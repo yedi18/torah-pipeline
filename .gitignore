@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment (keys & secrets — never commit!)
+.env
+
+# Generated output files
+output/
+
+# Logs
+server.log
+server.err
+*.log
+
+# Debug / temp files
+.claude/
+transcription_result.json

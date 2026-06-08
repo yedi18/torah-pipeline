@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Torah Pipeline</title>
+<style>
+/* ── Design tokens ─────────────────────────────────────────────────────────── */
+:root {
+  --bg: linear-gradient(135deg, #060614 0%, #0d0b2e 40%, #1a0533 100%);
+  --surface: rgba(255,255,255,0.04);
+  --surface-hover: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.08);
+  --accent: #7c3aed;
+  --accent2: #2563eb;
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --blur: blur(20px);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+/* ── Reset ─────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  direction: rtl;
+  line-height: 1.6;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+
+/* ── Keyframes ─────────────────────────────────────────────────────────────── */
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(124,58,237,0.6); }
+  70%  { box-shadow: 0 0 0 10px rgba(124,58,237,0); }
+  100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideDown {
+  from { opacity: 0; max-height: 0; transform: translateY(-6px); }
+  to   { opacity: 1; max-height: 2000px; transform: translateY(0); }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(20px); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ── Header ────────────────────────────────────────────────────────────────── */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  background: rgba(6,6,20,0.7);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.header-brand-icon { font-size: 1.5rem; }
+.header-nav { display: flex; gap: 4px; }
+.nav-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.nav-btn:hover { color: var(--text); background: var(--surface-hover); }
+.nav-btn.active {
+  color: var(--text);
+  background: var(--surface-hover);
+  border-color: var(--border);
+}
+
+/* ── Main layout ───────────────────────────────────────────────────────────── */
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+  animation: fadeIn 0.4s ease;
+}
+
+/* ── Views ─────────────────────────────────────────────────────────────────── */
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.3s ease; }
+
+/* ── Input card ────────────────────────────────────────────────────────────── */
+.input-card {
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.url-input {
+  flex: 1;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  direction: ltr;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.url-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+}
+.url-input::placeholder { color: var(--text-muted); }
+
+.start-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: opacity 0.2s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.start-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+.start-btn:active:not(:disabled) { transform: translateY(0); }
+.start-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Timeline ──────────────────────────────────────────────────────────────── */
+.timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  right: 23px;
+  top: 24px;
+  bottom: 24px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent), rgba(124,58,237,0.1));
+  z-index: 0;
+}
+
+/* ── Step card ─────────────────────────────────────────────────────────────── */
+.step-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 4px;
+  animation: fadeIn 0.3s ease both;
+}
+.step-card:nth-child(1) { animation-delay: 0.05s; }
+.step-card:nth-child(2) { animation-delay: 0.10s; }
+.step-card:nth-child(3) { animation-delay: 0.15s; }
+.step-card:nth-child(4) { animation-delay: 0.20s; }
+.step-card:nth-child(5) { animation-delay: 0.25s; }
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  position: relative;
+  z-index: 1;
+  transition: border-color 0.3s, background 0.3s;
+  margin-bottom: 2px;
+}
+.step-card.active .step-header {
+  border-color: rgba(124,58,237,0.4);
+  background: rgba(124,58,237,0.06);
+}
+.step-card.done .step-header { border-color: rgba(16,185,129,0.3); }
+.step-card.error .step-header {
+  border-color: rgba(239,68,68,0.4);
+  background: rgba(239,68,68,0.05);
+}
+
+/* Indicator dot */
+.step-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  transition: all 0.3s;
+}
+.step-card.active .step-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  animation: pulse-ring 1.5s infinite;
+}
+.step-card.done .step-dot { background: var(--success); border-color: var(--success); }
+.step-card.error .step-dot { background: var(--error); border-color: var(--error); }
+
+/* Step icon + info */
+.step-icon {
+  font-size: 1.3rem;
+  width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.step-info { flex: 1; min-width: 0; }
+.step-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.step-status {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.step-card.active .step-status { color: #a78bfa; }
+.step-card.done .step-status   { color: #6ee7b7; }
+.step-card.error .step-status  { color: #fca5a5; }
+
+/* Step meta: time + toggle */
+.step-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.step-elapsed {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 42px;
+  text-align: left;
+}
+.step-card.done .step-elapsed  { color: #6ee7b7; }
+.step-card.error .step-elapsed { color: #fca5a5; }
+
+.toggle-btn {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-family: inherit;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.toggle-btn:hover { background: var(--surface-hover); color: var(--text); }
+
+/* Spinner for active */
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(124,58,237,0.3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+/* ── Output panel ──────────────────────────────────────────────────────────── */
+.step-output {
+  display: none;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 20px;
+  margin-bottom: 10px;
+}
+.step-output.open { display: block; animation: slideDown 0.25s ease; }
+
+/* Audio player (step 1) */
+.audio-section { display: flex; flex-direction: column; gap: 12px; }
+.audio-section audio {
+  width: 100%;
+  height: 40px;
+  accent-color: var(--accent);
+}
+.output-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Text output (step 2, 4) */
+.text-output {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 0.88rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Final combined text — Word-ready (David/Narkisim 14pt double spacing) */
+.final-text-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.final-text {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 20px 24px;
+  max-height: 420px;
+  overflow-y: auto;
+  font-family: 'David', 'Narkisim', 'Arial', serif;
+  font-size: 14pt;
+  line-height: 2;
+  white-space: pre-wrap;
+  word-break: break-word;
+  direction: rtl;
+  text-align: right;
+  color: var(--text);
+}
+
+/* Per-part collapsible sections */
+.gpt-parts-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 14px 0 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.gpt-part-section { margin-bottom: 6px; }
+.gpt-part-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  transition: background 0.15s;
+}
+.gpt-part-header:hover { background: var(--surface-hover); color: var(--text); }
+.gpt-part-body {
+  display: none;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  padding: 14px 18px;
+  font-family: 'David', 'Narkisim', 'Arial', serif;
+  font-size: 13pt;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  direction: rtl;
+  text-align: right;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.gpt-part-body.open { display: block; }
+
+/* Side-by-side columns (step 3) */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+.compare-col-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Download button (step 5) */
+.download-big {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px;
+}
+.download-big-btn {
+  background: linear-gradient(135deg, var(--success), #059669);
+  border: none;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.2s, transform 0.1s;
+  box-shadow: 0 4px 24px rgba(16,185,129,0.25);
+}
+.download-big-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+/* ── Action buttons ────────────────────────────────────────────────────────── */
+.action-btn {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.action-btn:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.18); }
+.action-btn.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-color: transparent;
+  color: #fff;
+}
+.action-btn.primary:hover { opacity: 0.9; }
+
+/* ── History view ──────────────────────────────────────────────────────────── */
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.history-title { font-size: 1.1rem; font-weight: 700; }
+.history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.history-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+.history-card {
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  animation: fadeIn 0.3s ease both;
+}
+.history-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+.history-thumb {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  background: rgba(255,255,255,0.05);
+  display: block;
+}
+.history-thumb-placeholder {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(37,99,235,0.15));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+.history-body { padding: 14px 16px; }
+.history-title-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.history-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.status-badge.done    { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+.status-badge.error   { background: rgba(239,68,68,0.15);  color: #fca5a5; }
+.status-badge.running { background: rgba(124,58,237,0.15); color: #a78bfa; }
+
+/* Resume submenu */
+.resume-btn-wrap { position: relative; }
+.resume-main-btn {
+  width: 100%;
+  background: rgba(124,58,237,0.15);
+  border: 1px solid rgba(124,58,237,0.3);
+  color: #a78bfa;
+  padding: 9px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s;
+}
+.resume-main-btn:hover { background: rgba(124,58,237,0.25); }
+.resume-submenu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  background: #1a1040;
+  border: 1px solid rgba(124,58,237,0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 50;
+  animation: fadeIn 0.2s ease;
+  display: none;
+}
+.resume-submenu.open { display: block; }
+.resume-submenu-item {
+  padding: 11px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.15s;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.resume-submenu-item:last-child { border-bottom: none; }
+.resume-submenu-item:hover { background: rgba(124,58,237,0.15); }
+
+/* ── Resume edit dialog ────────────────────────────────────────────────────── */
+.resume-dlg-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(4px);
+  padding: 16px;
+}
+.resume-dlg-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+.resume-dlg-box {
+  background: #0f0d2a;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 720px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  animation: fadeIn 0.2s ease;
+}
+.resume-dlg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.resume-dlg-title { font-size: 1rem; font-weight: 700; }
+.resume-dlg-step-badge {
+  font-size: 0.75rem;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: rgba(124,58,237,0.2);
+  color: var(--accent);
+  border: 1px solid rgba(124,58,237,0.3);
+}
+.resume-dlg-close {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.resume-dlg-close:hover { background: var(--surface-hover); color: var(--text); }
+.resume-dlg-hint {
+  padding: 10px 20px 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.resume-dlg-body { flex: 1; overflow: hidden; padding: 12px 20px 16px; display: flex; flex-direction: column; }
+.resume-dlg-textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 280px;
+  max-height: 52vh;
+  resize: vertical;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'David', 'Narkisim', 'Arial', serif;
+  font-size: 13pt;
+  line-height: 1.85;
+  padding: 14px 16px;
+  direction: rtl;
+  text-align: right;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.resume-dlg-textarea:focus { border-color: var(--accent); }
+.resume-dlg-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Modal ─────────────────────────────────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+.modal-box {
+  background: #0f0d2a;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.25s ease;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title { font-size: 1rem; font-weight: 700; }
+.modal-close {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.modal-close:hover { background: var(--surface-hover); color: var(--text); }
+.modal-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 22px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-family: inherit;
+  font-weight: 500;
+  margin-bottom: -1px;
+  transition: all 0.2s;
+}
+.modal-tab:hover { color: var(--text); }
+.modal-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.modal-body { flex: 1; overflow-y: auto; padding: 20px 22px; }
+.modal-text {
+  font-size: 0.9rem;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.modal-footer {
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+}
+
+/* ── Toast ─────────────────────────────────────────────────────────────────── */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: rgba(30,27,75,0.95);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 0.87rem;
+  color: var(--text);
+  backdrop-filter: var(--blur);
+  animation: toastIn 0.25s ease forwards;
+  pointer-events: all;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 320px;
+}
+.toast.out { animation: toastOut 0.25s ease forwards; }
+
+/* ── Section title ─────────────────────────────────────────────────────────── */
+.section-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  main { padding: 20px 14px 60px; }
+  .input-card { flex-direction: column; }
+  .start-btn  { width: 100%; justify-content: center; }
+  .timeline::before { right: 19px; }
+  header { padding: 0 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<header>
+  <div class="header-brand">
+    <span class="header-brand-icon">&#128214;</span>
+    <span>Torah Pipeline</span>
+  </div>
+  <nav class="header-nav">
+    <button class="nav-btn active" id="nav-process" onclick="switchView('process')">&#1506;&#1497;&#1489;&#1493;&#1491;</button>
+    <button class="nav-btn" id="nav-history" onclick="switchView('history')">&#1492;&#1497;&#1505;&#1496;&#1493;&#1512;&#1497;&#1492;</button>
+  </nav>
+</header>
+
+<!-- ── Main ───────────────────────────────────────────────────────────────── -->
+<main>
+
+  <!-- ── Process view ─────────────────────────────────────────────────────── -->
+  <div class="view active" id="view-process">
+
+    <div class="input-card">
+      <input
+        class="url-input"
+        id="youtube-url"
+        type="url"
+        placeholder="https://www.youtube.com/watch?v=..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="start-btn" id="start-btn" onclick="startPipeline()">
+        <span id="start-icon">&#9654;</span>
+        <span id="start-label">התחל</span>
+      </button>
+    </div>
+
+    <div class="section-label">שלבי העיבוד</div>
+
+    <div class="timeline" id="timeline">
+
+      <!-- Step 1: Audio download -->
+      <div class="step-card waiting" id="step-card-1">
+        <div class="step-header">
+          <div class="step-dot" id="step-dot-1"></div>
+          <div class="step-icon">&#127925;</div>
+          <div class="step-info">
+            <div class="step-name">הורדת אודיו</div>
+            <div class="step-status" id="step-status-1">ממתין...</div>
+          </div>
+          <div class="step-meta">
+            <span class="step-elapsed" id="step-elapsed-1"></span>
+            <button class="toggle-btn" id="toggle-1" onclick="toggleOutput(1)" style="display:none">הצג &#9660;</button>
+          </div>
+        </div>
+        <div class="step-output" id="step-output-1">
+          <div class="audio-section">
+            <audio id="audio-player-1" controls style="display:none"></audio>
+            <div class="output-actions">
+              <button class="action-btn" id="mp3-download-btn" onclick="downloadMp3()" style="display:none">
+                &#8595; הורד MP3
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Transcription -->
+      <div class="step-card waiting" id="step-card-2">
+        <div class="step-header">
+          <div class="step-dot" id="step-dot-2"></div>
+          <div class="step-icon">&#127897;</div>
+          <div class="step-info">
+            <div class="step-name">תמלול</div>
+            <div class="step-status" id="step-status-2">ממתין...</div>
+          </div>
+          <div class="step-meta">
+            <span class="step-elapsed" id="step-elapsed-2"></span>
+            <button class="toggle-btn" id="toggle-2" onclick="toggleOutput(2)" style="display:none">הצג &#9660;</button>
+          </div>
+        </div>
+        <div class="step-output" id="step-output-2">
+          <div class="output-actions" style="margin-bottom:10px">
+            <button class="action-btn" onclick="copyText('transcription')">&#128203; העתק</button>
+            <button class="action-btn" onclick="openModal(2)">&#9974; הרחב</button>
+          </div>
+          <div class="text-output" id="transcription-text"></div>
+        </div>
+      </div>
+
+      <!-- Step 3: Claude proofread + split -->
+      <div class="step-card waiting" id="step-card-3">
+        <div class="step-header">
+          <div class="step-dot" id="step-dot-3"></div>
+          <div class="step-icon">&#129302;</div>
+          <div class="step-info">
+            <div class="step-name">הגהה וחלוקה (Claude)</div>
+            <div class="step-status" id="step-status-3">ממתין...</div>
+          </div>
+          <div class="step-meta">
+            <span class="step-elapsed" id="step-elapsed-3"></span>
+            <button class="toggle-btn" id="toggle-3" onclick="toggleOutput(3)" style="display:none">הצג &#9660;</button>
+          </div>
+        </div>
+        <div class="step-output" id="step-output-3">
+          <div class="output-actions" style="margin-bottom:12px">
+            <button class="action-btn" onclick="openModal(3)">&#9974; הרחב השוואה</button>
+          </div>
+          <div class="compare-grid">
+            <div>
+              <div class="compare-col-label">לפני (תמלול)</div>
+              <div class="text-output" id="compare-before-3"></div>
+            </div>
+            <div>
+              <div class="compare-col-label">אחרי (הגהת Claude)</div>
+              <div class="text-output" id="compare-after-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: GPT rewrite -->
+      <div class="step-card waiting" id="step-card-4">
+        <div class="step-header">
+          <div class="step-dot" id="step-dot-4"></div>
+          <div class="step-icon">&#9997;&#65039;</div>
+          <div class="step-info">
+            <div class="step-name">שכתוב (GPT)</div>
+            <div class="step-status" id="step-status-4">ממתין...</div>
+          </div>
+          <div class="step-meta">
+            <span class="step-elapsed" id="step-elapsed-4"></span>
+            <button class="toggle-btn" id="toggle-4" onclick="toggleOutput(4)" style="display:none">הצג &#9660;</button>
+          </div>
+        </div>
+        <div class="step-output" id="step-output-4">
+          <div class="output-actions" style="margin-bottom:10px">
+            <button class="action-btn" onclick="copyText('combined')">&#128203; העתק טקסט מלא</button>
+            <button class="action-btn" onclick="openModal(4)">&#9974; הרחב</button>
+          </div>
+          <div class="final-text-label">טקסט סופי — מוכן להדבקה ב-Word</div>
+          <div class="final-text" id="combined-text"></div>
+          <div id="gpt-parts-container"></div>
+        </div>
+      </div>
+
+      <!-- Step 5: Word export -->
+      <div class="step-card waiting" id="step-card-5">
+        <div class="step-header">
+          <div class="step-dot" id="step-dot-5"></div>
+          <div class="step-icon">&#128196;</div>
+          <div class="step-info">
+            <div class="step-name">ייצוא Word</div>
+            <div class="step-status" id="step-status-5">ממתין...</div>
+          </div>
+          <div class="step-meta">
+            <span class="step-elapsed" id="step-elapsed-5"></span>
+            <button class="toggle-btn" id="toggle-5" onclick="toggleOutput(5)" style="display:none">הצג &#9660;</button>
+          </div>
+        </div>
+        <div class="step-output" id="step-output-5">
+          <div class="download-big" id="download-area-5">
+            <div style="color:var(--text-muted);font-size:0.9rem">הקובץ יהיה זמין כאן לאחר סיום העיבוד</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /timeline -->
+  </div><!-- /view-process -->
+
+  <!-- ── History view ──────────────────────────────────────────────────────── -->
+  <div class="view" id="view-history">
+    <div class="history-header">
+      <div class="history-title">היסטוריית עיבודים</div>
+      <button class="action-btn" onclick="clearHistory()">&#128465; נקה הכל</button>
+    </div>
+    <div class="history-grid" id="history-grid">
+      <div class="history-empty" id="history-empty">
+        <div style="font-size:2.5rem;margin-bottom:12px">&#128461;</div>
+        <div>אין עיבודים בהיסטוריה</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Modal ──────────────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleModalOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">תצוגה מורחבת</div>
+      <button class="modal-close" onclick="closeModal()">&#10005;</button>
+    </div>
+    <div class="modal-tabs" id="modal-tabs" style="display:none">
+      <button class="modal-tab active" id="modal-tab-before" onclick="switchModalTab('before')">לפני</button>
+      <button class="modal-tab" id="modal-tab-after" onclick="switchModalTab('after')">אחרי</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-text" id="modal-text"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="action-btn primary" onclick="copyModalText()">&#128203; העתק</button>
+      <button class="action-btn" onclick="downloadModalText()">&#8595; הורד טקסט</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Resume edit dialog ────────────────────────────────────────────────── -->
+<div class="resume-dlg-overlay" id="resume-dlg-overlay" onclick="handleResumeDlgOverlayClick(event)">
+  <div class="resume-dlg-box" onclick="event.stopPropagation()">
+    <div class="resume-dlg-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="resume-dlg-title" id="resume-dlg-title">המשך עיבוד</div>
+        <div class="resume-dlg-step-badge" id="resume-dlg-badge"></div>
+      </div>
+      <button class="resume-dlg-close" onclick="closeResumeDlg()">&#10005;</button>
+    </div>
+    <div class="resume-dlg-hint" id="resume-dlg-hint"></div>
+    <div class="resume-dlg-body">
+      <textarea class="resume-dlg-textarea" id="resume-dlg-textarea" dir="rtl" spellcheck="false"></textarea>
+    </div>
+    <div class="resume-dlg-footer">
+      <button class="action-btn" onclick="closeResumeDlg()">ביטול</button>
+      <button class="action-btn primary" id="resume-dlg-confirm-btn" onclick="confirmResumeDlg()">המשך &#9654;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast container ────────────────────────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+const state = {
+  currentJob: null,   // { jobId, steps:{}, results:{}, youtubeUrl }
+  eventSource: null,
+  history: [],
+  activeView: 'process',
+  activeModal: null,  // { step, tab }
+  timers: {},         // step -> { startTime, intervalId } | null
+};
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  loadHistory();
+  document.getElementById('youtube-url').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') startPipeline();
+  });
+});
+
+// ── View switching ────────────────────────────────────────────────────────────
+function switchView(view) {
+  state.activeView = view;
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('view-' + view).classList.add('active');
+  document.getElementById('nav-' + view).classList.add('active');
+  if (view === 'history') renderHistory();
+}
+
+// ── Pipeline start ────────────────────────────────────────────────────────────
+async function startPipeline() {
+  var url = document.getElementById('youtube-url').value.trim();
+  if (!url) { showToast('נא להזין כתובת YouTube'); return; }
+
+  resetUI();
+
+  try {
+    var res = await fetch('/api/process', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ youtubeUrl: url }),
+    });
+    var data = await res.json();
+    if (!data.jobId) throw new Error(data.error || 'שגיאה בהתחלת עיבוד');
+
+    state.currentJob = { jobId: data.jobId, steps: {}, results: {}, youtubeUrl: url };
+    setStartBtnLoading(true);
+    openSSE(data.jobId);
+  } catch (err) {
+    showToast('שגיאה: ' + err.message);
+    setStartBtnLoading(false);
+  }
+}
+
+// ── Resume from step ──────────────────────────────────────────────────────────
+async function resumeFromStep(fromStep, extraData) {
+  resetUI();
+  setStartBtnLoading(true);
+  switchView('process');
+
+  try {
+    var body = Object.assign({ fromStep: fromStep }, extraData);
+    var res = await fetch('/api/resume', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    var data = await res.json();
+    if (!data.jobId) throw new Error(data.error || 'שגיאה בהמשך עיבוד');
+
+    state.currentJob = Object.assign({ jobId: data.jobId, steps: {}, results: {} }, extraData);
+    openSSE(data.jobId);
+  } catch (err) {
+    showToast('שגיאה: ' + err.message);
+    setStartBtnLoading(false);
+  }
+}
+
+// ── SSE ───────────────────────────────────────────────────────────────────────
+function openSSE(jobId) {
+  if (state.eventSource) state.eventSource.close();
+  var es = new EventSource('/api/progress/' + jobId);
+  state.eventSource = es;
+
+  es.onmessage = function(event) {
+    try {
+      var data = JSON.parse(event.data);
+      handleSSEMessage(data);
+    } catch (e) {}
+  };
+
+  es.onerror = function() {
+    es.close();
+    state.eventSource = null;
+    setStartBtnLoading(false);
+  };
+}
+
+function handleSSEMessage(data) {
+  if (data.type === 'step') {
+    updateStep(data.step, data.status, data.message);
+  } else if (data.type === 'result') {
+    if (state.currentJob) {
+      state.currentJob.results['step' + data.step] = data.data;
+    }
+    renderStepOutput(data.step, data.data);
+    showToggleBtn(data.step);
+  } else if (data.type === 'done') {
+    setStartBtnLoading(false);
+    if (state.eventSource) { state.eventSource.close(); state.eventSource = null; }
+    if (state.currentJob) {
+      var r = state.currentJob.results;
+      var videoId = (r.step1 && r.step1.videoId) || extractVideoId(state.currentJob.youtubeUrl);
+      var record = {
+        id: state.currentJob.jobId,
+        timestamp: Date.now(),
+        videoId: videoId,
+        videoTitle: 'שיעור תורה — ' + new Date().toLocaleDateString('he-IL'),
+        mp3Url: (r.step1 && r.step1.mp3Url) || null,
+        transcription: (r.step2 && r.step2.transcription) || null,
+        parts: (r.step3 && r.step3.parts) || null,
+        combined: (r.step4 && r.step4.combined) || null,
+        filename: data.filename,
+        status: 'done',
+      };
+      saveToHistory(record);
+    }
+  } else if (data.type === 'error') {
+    setStartBtnLoading(false);
+    if (state.eventSource) { state.eventSource.close(); state.eventSource = null; }
+    showToast('שגיאה: ' + data.message);
+  }
+}
+
+// ── Update step UI ────────────────────────────────────────────────────────────
+function updateStep(n, status, message) {
+  var card = document.getElementById('step-card-' + n);
+  var statusEl = document.getElementById('step-status-' + n);
+  if (!card || !statusEl) return;
+
+  card.className = 'step-card ' + status;
+  statusEl.textContent = message || '';
+
+  if (status === 'active') {
+    startStepTimer(n);
+    var nameEl = card.querySelector('.step-name');
+    if (nameEl && !nameEl.querySelector('.spinner')) {
+      var sp = document.createElement('span');
+      sp.className = 'spinner';
+      nameEl.appendChild(sp);
+    }
+  } else if (status === 'done' || status === 'error') {
+    stopStepTimer(n);
+    var spinner = card.querySelector('.spinner');
+    if (spinner) spinner.remove();
+    var dot = document.getElementById('step-dot-' + n);
+    if (dot) dot.textContent = status === 'done' ? '✓' : '✕';
+  }
+}
+
+// ── Timers ────────────────────────────────────────────────────────────────────
+function startStepTimer(n) {
+  if (state.timers[n]) clearInterval(state.timers[n].intervalId);
+  var startTime = Date.now();
+  var el = document.getElementById('step-elapsed-' + n);
+  var intervalId = setInterval(function() {
+    if (el) el.textContent = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
+  }, 100);
+  state.timers[n] = { startTime: startTime, intervalId: intervalId };
+}
+
+function stopStepTimer(n) {
+  if (state.timers[n]) {
+    clearInterval(state.timers[n].intervalId);
+    var el = document.getElementById('step-elapsed-' + n);
+    if (el && state.timers[n].startTime) {
+      el.textContent = ((Date.now() - state.timers[n].startTime) / 1000).toFixed(1) + 's';
+    }
+    state.timers[n] = null;
+  }
+}
+
+// ── Toggle output panel ───────────────────────────────────────────────────────
+function showToggleBtn(n) {
+  var btn = document.getElementById('toggle-' + n);
+  if (btn) btn.style.display = '';
+}
+
+function toggleOutput(n) {
+  var panel = document.getElementById('step-output-' + n);
+  var btn = document.getElementById('toggle-' + n);
+  if (!panel) return;
+  var isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  if (btn) btn.textContent = isOpen ? 'הצג ▾' : 'הסתר ▴';
+}
+
+// ── Render step output ────────────────────────────────────────────────────────
+function renderStepOutput(n, data) {
+  if (n === 1) {
+    var player = document.getElementById('audio-player-1');
+    var dlBtn = document.getElementById('mp3-download-btn');
+    if (player && data.mp3Url) {
+      player.src = data.mp3Url;
+      player.style.display = '';
+    }
+    if (dlBtn) dlBtn.style.display = '';
+  }
+
+  if (n === 2) {
+    var el = document.getElementById('transcription-text');
+    if (el && data.transcription) el.textContent = data.transcription;
+  }
+
+  if (n === 3) {
+    var before = document.getElementById('compare-before-3');
+    var after = document.getElementById('compare-after-3');
+    if (before && data.original) before.textContent = data.original;
+    if (after && data.parts) after.textContent = data.parts.join('\n\n---\n\n');
+  }
+
+  if (n === 4) {
+    var el4 = document.getElementById('combined-text');
+    if (el4 && data.combined) el4.textContent = data.combined;
+
+    var partsContainer = document.getElementById('gpt-parts-container');
+    if (partsContainer && Array.isArray(data.parts) && data.parts.length > 0) {
+      var html = '';
+      if (data.parts.length > 1) {
+        html += '<div class="gpt-parts-label">חלקים בנפרד (' + data.parts.length + ')</div>';
+      }
+      data.parts.forEach(function(part, i) {
+        var preview = part.replace(/\n/g, ' ').slice(0, 60);
+        html += '<div class="gpt-part-section">' +
+          '<div class="gpt-part-header" onclick="toggleGptPart(this)">' +
+          '<span>&#9654; חלק ' + (i + 1) + '</span>' +
+          '<span style="font-size:0.8rem;opacity:0.7">' + preview + '...</span>' +
+          '</div>' +
+          '<div class="gpt-part-body"></div>' +
+          '</div>';
+      });
+      partsContainer.innerHTML = html;
+      // Set textContent for each part body (avoids XSS, preserves whitespace)
+      var bodies = partsContainer.querySelectorAll('.gpt-part-body');
+      data.parts.forEach(function(part, i) { bodies[i].textContent = part; });
+    } else if (partsContainer) {
+      partsContainer.innerHTML = '';
+    }
+  }
+
+  if (n === 5) {
+    var area = document.getElementById('download-area-5');
+    if (area && data.filename) {
+      area.innerHTML =
+        '<div style="color:var(--success);font-size:0.9rem;margin-bottom:8px">&#10003; הקובץ מוכן להורדה</div>' +
+        '<button class="download-big-btn" onclick="downloadFile(\'' + data.filename + '\')">' +
+        '<span>&#128196;</span><span>הורד קובץ Word</span></button>';
+      showToast('קובץ Word מוכן!');
+    }
+  }
+}
+
+// ── GPT part toggle ───────────────────────────────────────────────────────────
+function toggleGptPart(header) {
+  var body = header.nextElementSibling;
+  var arrow = header.querySelector('span:first-child');
+  if (body.classList.contains('open')) {
+    body.classList.remove('open');
+    if (arrow) arrow.textContent = '► חלק ' + (Array.from(header.parentElement.parentElement.children).indexOf(header.parentElement) + 1);
+  } else {
+    body.classList.add('open');
+    if (arrow) arrow.textContent = '▼ חלק ' + (Array.from(header.parentElement.parentElement.children).indexOf(header.parentElement) + 1);
+  }
+}
+
+// ── Download ──────────────────────────────────────────────────────────────────
+function downloadFile(filename) {
+  window.open('/api/download/' + filename, '_blank');
+}
+
+function downloadMp3() {
+  var r = state.currentJob && state.currentJob.results && state.currentJob.results.step1;
+  if (r && r.mp3Url) window.open(r.mp3Url, '_blank');
+}
+
+// ── Copy ──────────────────────────────────────────────────────────────────────
+function copyText(key) {
+  var text = '';
+  if (key === 'transcription') {
+    text = (state.currentJob && state.currentJob.results && state.currentJob.results.step2 && state.currentJob.results.step2.transcription) || '';
+  } else if (key === 'combined') {
+    text = (state.currentJob && state.currentJob.results && state.currentJob.results.step4 && state.currentJob.results.step4.combined) || '';
+  }
+  if (!text) { showToast('אין טקסט להעתקה'); return; }
+  navigator.clipboard.writeText(text).then(function() { showToast('הועתק ללוח'); });
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(step) {
+  var overlay = document.getElementById('modal-overlay');
+  var titleEl = document.getElementById('modal-title');
+  var tabsEl = document.getElementById('modal-tabs');
+  var textEl = document.getElementById('modal-text');
+  var results = state.currentJob && state.currentJob.results;
+
+  state.activeModal = { step: step, tab: 'after' };
+
+  if (step === 2) {
+    titleEl.textContent = 'תמלול';
+    tabsEl.style.display = 'none';
+    textEl.textContent = (results && results.step2 && results.step2.transcription) || '';
+  } else if (step === 3) {
+    titleEl.textContent = 'הגהה וחלוקה — השוואה';
+    tabsEl.style.display = '';
+    document.getElementById('modal-tab-before').textContent = 'לפני';
+    document.getElementById('modal-tab-after').textContent = 'אחרי';
+    switchModalTab('before');
+  } else if (step === 4) {
+    titleEl.textContent = 'שכתוב סופי';
+    tabsEl.style.display = 'none';
+    textEl.textContent = (results && results.step4 && results.step4.combined) || '';
+  }
+
+  overlay.classList.add('open');
+}
+
+function switchModalTab(tab) {
+  state.activeModal = Object.assign({}, state.activeModal, { tab: tab });
+  var textEl = document.getElementById('modal-text');
+  var results = state.currentJob && state.currentJob.results;
+
+  document.querySelectorAll('.modal-tab').forEach(function(t) { t.classList.remove('active'); });
+
+  if (tab === 'before') {
+    document.getElementById('modal-tab-before').classList.add('active');
+    if (state.activeModal.step === 3) {
+      textEl.textContent = (results && results.step3 && results.step3.original) || '';
+    }
+  } else {
+    document.getElementById('modal-tab-after').classList.add('active');
+    if (state.activeModal.step === 3) {
+      var parts = (results && results.step3 && results.step3.parts) || [];
+      textEl.textContent = parts.join('\n\n---\n\n');
+    }
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  state.activeModal = null;
+}
+
+function handleModalOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+function copyModalText() {
+  var text = document.getElementById('modal-text').textContent;
+  navigator.clipboard.writeText(text).then(function() { showToast('הועתק ללוח'); });
+}
+
+function downloadModalText() {
+  var text = document.getElementById('modal-text').textContent;
+  if (!text) return;
+  var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'torah_text_' + Date.now() + '.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('הורדה החלה');
+}
+
+// ── Reset UI ──────────────────────────────────────────────────────────────────
+function resetUI() {
+  // Clear timers
+  Object.keys(state.timers).forEach(function(n) {
+    if (state.timers[n]) clearInterval(state.timers[n].intervalId);
+  });
+  state.timers = {};
+
+  for (var n = 1; n <= 5; n++) {
+    var card = document.getElementById('step-card-' + n);
+    if (card) card.className = 'step-card waiting';
+
+    var statusEl = document.getElementById('step-status-' + n);
+    if (statusEl) statusEl.textContent = 'ממתין...';
+
+    var elapsedEl = document.getElementById('step-elapsed-' + n);
+    if (elapsedEl) elapsedEl.textContent = '';
+
+    var dotEl = document.getElementById('step-dot-' + n);
+    if (dotEl) dotEl.textContent = '';
+
+    var toggleBtn = document.getElementById('toggle-' + n);
+    if (toggleBtn) { toggleBtn.style.display = 'none'; toggleBtn.textContent = 'הצג ▾'; }
+
+    var outputPanel = document.getElementById('step-output-' + n);
+    if (outputPanel) outputPanel.classList.remove('open');
+
+    if (card) { var spinner = card.querySelector('.spinner'); if (spinner) spinner.remove(); }
+  }
+
+  var transcEl = document.getElementById('transcription-text');
+  if (transcEl) transcEl.textContent = '';
+  var before3 = document.getElementById('compare-before-3');
+  if (before3) before3.textContent = '';
+  var after3 = document.getElementById('compare-after-3');
+  if (after3) after3.textContent = '';
+  var combined4 = document.getElementById('combined-text');
+  if (combined4) combined4.textContent = '';
+  var gptParts = document.getElementById('gpt-parts-container');
+  if (gptParts) gptParts.innerHTML = '';
+  var dlArea5 = document.getElementById('download-area-5');
+  if (dlArea5) dlArea5.innerHTML = '<div style="color:var(--text-muted);font-size:0.9rem">הקובץ יהיה זמין כאן לאחר סיום העיבוד</div>';
+
+  var audioPlayer = document.getElementById('audio-player-1');
+  if (audioPlayer) { audioPlayer.src = ''; audioPlayer.style.display = 'none'; }
+  var mp3Btn = document.getElementById('mp3-download-btn');
+  if (mp3Btn) mp3Btn.style.display = 'none';
+
+  state.currentJob = null;
+  if (state.eventSource) { state.eventSource.close(); state.eventSource = null; }
+}
+
+function setStartBtnLoading(loading) {
+  var btn = document.getElementById('start-btn');
+  var icon = document.getElementById('start-icon');
+  var label = document.getElementById('start-label');
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) {
+    icon.className = 'spinner';
+    icon.textContent = '';
+    label.textContent = 'מעבד...';
+  } else {
+    icon.className = '';
+    icon.textContent = '▶';
+    label.textContent = 'התחל';
+  }
+}
+
+// ── History ───────────────────────────────────────────────────────────────────
+var HISTORY_KEY = 'torah-pipeline-history';
+
+function loadHistory() {
+  try {
+    state.history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch (e) {
+    state.history = [];
+  }
+}
+
+function saveToHistory(record) {
+  loadHistory();
+  state.history = state.history.filter(function(r) { return r.id !== record.id; });
+  state.history.unshift(record);
+  if (state.history.length > 50) state.history = state.history.slice(0, 50);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(state.history));
+  showToast('נשמר בהיסטוריה');
+}
+
+function clearHistory() {
+  if (!confirm('למחוק את כל ההיסטוריה?')) return;
+  state.history = [];
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+}
+
+function renderHistory() {
+  loadHistory();
+  var grid = document.getElementById('history-grid');
+  var empty = document.getElementById('history-empty');
+  if (!grid) return;
+
+  // Remove old cards
+  var oldCards = grid.querySelectorAll('.history-card');
+  oldCards.forEach(function(el) { el.remove(); });
+
+  if (state.history.length === 0) {
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  state.history.forEach(function(record, idx) {
+    var card = document.createElement('div');
+    card.className = 'history-card';
+    card.style.animationDelay = (idx * 0.05) + 's';
+
+    var thumbHtml = record.videoId
+      ? '<img class="history-thumb" src="https://img.youtube.com/vi/' + record.videoId + '/mqdefault.jpg" alt="thumbnail" onerror="this.style.display=\'none\'" loading="lazy" />'
+      : '<div class="history-thumb-placeholder">&#128214;</div>';
+
+    var date = new Date(record.timestamp).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    var statusLabel = record.status === 'done' ? 'הושלם' : record.status === 'error' ? 'שגיאה' : 'רץ';
+    var statusClass = record.status || 'done';
+
+    var resumeItems = '';
+    if (record.transcription) resumeItems += '<div class="resume-submenu-item" onclick="doResume(\'' + record.id + '\', 3)">&#129302; מהגהה (Claude)</div>';
+    if (record.parts) resumeItems += '<div class="resume-submenu-item" onclick="doResume(\'' + record.id + '\', 4)">&#9997;&#65039; מהשכתוב (GPT)</div>';
+    if (record.combined) resumeItems += '<div class="resume-submenu-item" onclick="doResume(\'' + record.id + '\', 5)">&#128196; ייצוא Word</div>';
+    if (record.filename) resumeItems += '<div class="resume-submenu-item" onclick="downloadFile(\'' + record.filename + '\')">&#8595; הורד Word קיים</div>';
+
+    card.innerHTML =
+      thumbHtml +
+      '<div class="history-body">' +
+      '<div class="history-title-text">' + escapeHtml(record.videoTitle || 'שיעור תורה') + '</div>' +
+      '<div class="history-meta">' +
+      '<span>' + date + '</span><span>&#8226;</span>' +
+      '<span class="status-badge ' + statusClass + '">' + statusLabel + '</span>' +
+      '</div>' +
+      '<div class="resume-btn-wrap" id="resume-wrap-' + record.id + '">' +
+      '<button class="resume-main-btn" onclick="toggleResumeMenu(\'' + record.id + '\')">' +
+      '<span>המשך מכאן &#9658;</span><span>&#8964;</span></button>' +
+      '<div class="resume-submenu" id="resume-menu-' + record.id + '">' + resumeItems + '</div>' +
+      '</div>' +
+      '</div>';
+
+    grid.appendChild(card);
+  });
+}
+
+function toggleResumeMenu(id) {
+  document.querySelectorAll('.resume-submenu.open').forEach(function(m) {
+    if (m.id !== 'resume-menu-' + id) m.classList.remove('open');
+  });
+  var menu = document.getElementById('resume-menu-' + id);
+  if (menu) menu.classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.resume-btn-wrap')) {
+    document.querySelectorAll('.resume-submenu.open').forEach(function(m) { m.classList.remove('open'); });
+  }
+});
+
+function doResume(recordId, fromStep) {
+  var record = null;
+  for (var i = 0; i < state.history.length; i++) {
+    if (state.history[i].id === recordId) { record = state.history[i]; break; }
+  }
+  if (!record) { showToast('לא נמצא רשומה'); return; }
+
+  document.querySelectorAll('.resume-submenu.open').forEach(function(m) { m.classList.remove('open'); });
+
+  openResumeDlg(fromStep, record);
+}
+
+// ── Resume edit dialog ────────────────────────────────────────────────────────
+var _pendingResume = null;
+
+var RESUME_DLG_CONFIG = {
+  3: {
+    title: 'המשך מתמלול',
+    badge: 'שלב 3 — הגהה',
+    hint: 'זהו התמלול הגולמי. ניתן לערוך לפני שממשיכים להגהה עם Claude.',
+    getContent: function(r) { return r.transcription || ''; },
+    confirmBtn: 'הגה עם Claude &#9654;',
+    buildExtra: function(r, text) {
+      return { youtubeUrl: r.youtubeUrl || null, transcription: text, parts: null, rewrittenText: null };
+    },
+  },
+  4: {
+    title: 'המשך מהגהה',
+    badge: 'שלב 4 — שכתוב GPT',
+    hint: 'אלו החלקים המוגהים על ידי Claude. ניתן לערוך לפני שממשיכים לשכתוב עם GPT.\nחלקים מופרדים בשורת "---".',
+    getContent: function(r) { return Array.isArray(r.parts) ? r.parts.join('\n\n---\n\n') : (r.parts || ''); },
+    confirmBtn: 'שכתב עם GPT &#9654;',
+    buildExtra: function(r, text) {
+      var parts = text.split(/\n+---\n+/).map(function(p) { return p.trim(); }).filter(Boolean);
+      return { youtubeUrl: r.youtubeUrl || null, transcription: r.transcription || null, parts: parts.length ? parts : [text], rewrittenText: null };
+    },
+  },
+  5: {
+    title: 'המשך משכתוב',
+    badge: 'שלב 5 — ייצוא Word',
+    hint: 'זהו הטקסט המשוכתב הסופי. ניתן לערוך לפני ייצוא לקובץ Word.',
+    getContent: function(r) { return r.combined || ''; },
+    confirmBtn: 'ייצא ל-Word &#9654;',
+    buildExtra: function(r, text) {
+      return { youtubeUrl: r.youtubeUrl || null, transcription: r.transcription || null, parts: r.parts || null, rewrittenText: text };
+    },
+  },
+};
+
+function openResumeDlg(fromStep, record) {
+  var cfg = RESUME_DLG_CONFIG[fromStep];
+  if (!cfg) { showToast('שלב לא מוכר'); return; }
+
+  var content = cfg.getContent(record);
+  if (!content) { showToast('אין נתונים לשלב זה בהיסטוריה'); return; }
+
+  _pendingResume = { fromStep: fromStep, record: record };
+
+  document.getElementById('resume-dlg-title').textContent = cfg.title;
+  document.getElementById('resume-dlg-badge').textContent = cfg.badge;
+  document.getElementById('resume-dlg-hint').textContent = cfg.hint;
+  document.getElementById('resume-dlg-textarea').value = content;
+  document.getElementById('resume-dlg-confirm-btn').innerHTML = cfg.confirmBtn;
+
+  document.getElementById('resume-dlg-overlay').classList.add('open');
+  setTimeout(function() { document.getElementById('resume-dlg-textarea').focus(); }, 120);
+}
+
+function closeResumeDlg() {
+  document.getElementById('resume-dlg-overlay').classList.remove('open');
+  _pendingResume = null;
+}
+
+function handleResumeDlgOverlayClick(e) {
+  if (e.target === document.getElementById('resume-dlg-overlay')) closeResumeDlg();
+}
+
+function confirmResumeDlg() {
+  if (!_pendingResume) return;
+  var cfg = RESUME_DLG_CONFIG[_pendingResume.fromStep];
+  var text = document.getElementById('resume-dlg-textarea').value.trim();
+  if (!text) { showToast('הטקסט ריק'); return; }
+
+  var extraData = cfg.buildExtra(_pendingResume.record, text);
+  closeResumeDlg();
+  resumeFromStep(_pendingResume.fromStep, extraData);
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(message) {
+  var container = document.getElementById('toast-container');
+  var toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  setTimeout(function() {
+    toast.classList.add('out');
+    setTimeout(function() { toast.remove(); }, 300);
+  }, 2500);
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function extractVideoId(url) {
+  if (!url) return null;
+  var m = url.match(/(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/);
+  return m ? m[1] : null;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
