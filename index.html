@@ -20,6 +20,9 @@
       <p class="subtitle" data-i18n="subtitle">תמלול מהיר ופשוט · הקלטה, קובץ או יוטיוב</p>
     </div>
     <div class="header-buttons">
+      <button class="lang-btn" id="lang-btn" onclick="toggleLang()" data-i18n-title="langSwitchTitle" title="החלף שפה">
+        <span class="globe">🌐</span><span id="lang-label">עב</span>
+      </button>
       <button class="icon-btn theme-btn" onclick="toggleTheme()" data-i18n-title="titleTheme" title="מצב כהה / בהיר">
         <span class="sun">☀️</span><span class="moon">🌙</span>
       </button>
@@ -141,18 +144,37 @@
     <div class="error" id="y-error"></div>
 
     <div class="result" id="y-result">
-      <div class="success-badge" data-i18n="badgeConvert">✅ ההמרה הושלמה</div>
-      <div class="video-preview">
-        <img id="y-thumb" class="video-thumbnail" src="" alt="thumbnail" />
-        <div class="video-info">
-          <div class="video-title" id="y-title"></div>
-          <div class="video-meta"><span id="y-duration">⏱ --:--</span></div>
+      <div class="success-badge" id="y-main-badge" data-i18n="badgeConvert">✅ ההמרה הושלמה</div>
+
+      <button class="yt-source-toggle" id="y-source-toggle" style="display:none" onclick="toggleYtSource()">
+        🎬 <span data-i18n="showSource">הצג סרטון מקור / הורדה</span> <span class="chev">▾</span>
+      </button>
+
+      <div id="y-source">
+        <div class="video-preview">
+          <img id="y-thumb" class="video-thumbnail" src="" alt="thumbnail" />
+          <div class="video-info">
+            <div class="video-title" id="y-title"></div>
+            <div class="video-meta"><span id="y-duration">⏱ --:--</span></div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <a href="#" id="y-download" class="download-btn" data-i18n="btnDownloadAudio">⬇️ הורד אודיו</a>
+          <button class="secondary-btn" id="y-transcribe-btn" onclick="transcribeYoutube()" data-i18n="btnTranscribeThis">🎙️ תמלל את זה</button>
         </div>
       </div>
-      <div class="result-actions">
-        <a href="#" id="y-download" class="download-btn" data-i18n="btnDownloadAudio">⬇️ הורד אודיו</a>
+
+      <div id="y-tx" style="display:none">
+        <div class="transcript-head">
+          <div class="success-badge" data-i18n="badgeTranscript">✅ התמלול מוכן</div>
+          <div class="result-actions" style="flex:0">
+            <button class="secondary-btn" onclick="copyYtTranscript()" data-i18n="btnCopy">📋 העתק</button>
+            <button class="secondary-btn" onclick="downloadYtTranscript()" data-i18n="btnDownloadTxt">⬇️ הורד טקסט</button>
+          </div>
+        </div>
+        <div class="transcript-box" id="y-text"></div>
+        <div class="word-count" id="y-wordcount"></div>
       </div>
-      <div class="future-note" data-i18n="ytHint">💡 להורדה בלבד. כדי לתמלל — הורידו את הקובץ וגררו אותו ללשונית "תמלול".</div>
     </div>
   </div>
 
@@ -173,16 +195,10 @@
   <div id="settings-tab" class="tab-content">
     <div class="settings-section">
 
-      <!-- ivrit.ai -->
+      <!-- API keys -->
       <div class="settings-group">
-        <div class="settings-title" data-i18n="setIvritTitle">🗝️ הגדרת התמלול (ivrit.ai)</div>
-        <div class="tutorial-box">
-          <h3 data-i18n="ivritTutTitle">📖 איך משיגים את המפתחות של ivrit.ai</h3>
-          <div class="tutorial-step"><div class="step-number">1</div><div class="step-content"><strong data-i18n="ivritS1t">נכנסים ל-RunPod</strong><p data-i18n="ivritS1p">היכנסו ל-<a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> והתחברו (אפשר עם Google).</p></div></div>
-          <div class="tutorial-step"><div class="step-number">2</div><div class="step-content"><strong data-i18n="ivritS2t">פורסים את ivrit.ai</strong><p data-i18n="ivritS2p">צרו endpoint חדש עם ה-image של <code>ivrit-ai/runpod-serverless</code>.</p></div></div>
-          <div class="tutorial-step"><div class="step-number">3</div><div class="step-content"><strong data-i18n="ivritS3t">מעתיקים את ה-API Key</strong><p data-i18n="ivritS3p">בתפריט <strong>Settings → API Keys</strong> צרו מפתח חדש והדביקו אותו בשדה הראשון למטה.</p></div></div>
-          <div class="tutorial-step"><div class="step-number">4</div><div class="step-content"><strong data-i18n="ivritS4t">מעתיקים את ה-Endpoint ID</strong><p data-i18n="ivritS4p">לחצו על ה-endpoint שיצרתם והעתיקו את ה-<strong>Endpoint ID</strong> לשדה השני.</p></div></div>
-        </div>
+        <div class="settings-title" data-i18n="apiKeysTitle">🔑 מפתחות API</div>
+
         <div class="api-input-group">
           <label><span class="cfg-dot" id="dot-IVRIT_API_KEY"></span> <span data-i18n="labelIvritKey">ivrit.ai — API Key (RunPod)</span></label>
           <div class="api-input-row">
@@ -197,24 +213,38 @@
             <button class="eye-btn" onclick="toggleEye('cfg-IVRIT_ENDPOINT_ID')">👁️</button>
           </div>
         </div>
-      </div>
-
-      <!-- RapidAPI -->
-      <div class="settings-group">
-        <div class="settings-title" data-i18n="setRapidTitle">🔑 הורדת יוטיוב (RapidAPI) — אופציונלי</div>
-        <div class="tutorial-box">
-          <h3 data-i18n="rapidTutTitle">📖 איך משיגים מפתח RapidAPI חינמי</h3>
-          <div class="tutorial-step"><div class="step-number">1</div><div class="step-content"><strong data-i18n="rapidS1t">פותחים את עמוד ה-API</strong><p data-i18n="rapidS1p">היכנסו ל-<a href="https://rapidapi.com/ytjar/api/youtube-mp36" target="_blank" rel="noopener">YouTube MP3 (ytjar) ב-RapidAPI</a>.</p></div></div>
-          <div class="tutorial-step"><div class="step-number">2</div><div class="step-content"><strong data-i18n="rapidS2t">נרשמים / מתחברים</strong><p data-i18n="rapidS2p">צרו חשבון חינמי (גם עם Google) או התחברו.</p></div></div>
-          <div class="tutorial-step"><div class="step-number">3</div><div class="step-content"><strong data-i18n="rapidS3t">נרשמים לחבילה החינמית</strong><p data-i18n="rapidS3p">לחצו על <strong>Subscribe to Test</strong> ובחרו את חבילת <code>BASIC</code> החינמית (ללא כרטיס אשראי).</p></div></div>
-          <div class="tutorial-step"><div class="step-number">4</div><div class="step-content"><strong data-i18n="rapidS4t">מעתיקים את המפתח</strong><p data-i18n="rapidS4p">בלשונית <strong>Endpoints</strong>, תחת <strong>Header Parameters</strong>, העתיקו את הערך של <code>X-RapidAPI-Key</code>.</p></div></div>
+        <button class="help-toggle" onclick="toggleHelp(this)">❓ <span data-i18n="howToGetIvrit">איך משיגים את המפתחות של ivrit.ai?</span> <span class="chev">▾</span></button>
+        <div class="help-body">
+          <div class="tutorial-box">
+            <h3 data-i18n="ivritTutTitle">📖 איך משיגים את המפתחות של ivrit.ai</h3>
+            <div class="tutorial-step"><div class="step-number">1</div><div class="step-content"><strong data-i18n="ivritS1t">נכנסים ל-RunPod</strong><p data-i18n="ivritS1p">היכנסו ל-<a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> והתחברו (אפשר עם Google).</p></div></div>
+            <div class="tutorial-step"><div class="step-number">2</div><div class="step-content"><strong data-i18n="ivritS2t">פורסים את ivrit.ai</strong><p data-i18n="ivritS2p">צרו endpoint חדש עם ה-image של <code>ivrit-ai/runpod-serverless</code>.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">3</div><div class="step-content"><strong data-i18n="ivritS3t">מעתיקים את ה-API Key</strong><p data-i18n="ivritS3p">בתפריט <strong>Settings → API Keys</strong> צרו מפתח חדש והדביקו אותו בשדה הראשון למעלה.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">4</div><div class="step-content"><strong data-i18n="ivritS4t">מעתיקים את ה-Endpoint ID</strong><p data-i18n="ivritS4p">לחצו על ה-endpoint שיצרתם והעתיקו את ה-<strong>Endpoint ID</strong> לשדה השני.</p></div></div>
+          </div>
         </div>
-        <div class="api-input-group">
-          <label><span class="cfg-dot" id="dot-RAPIDAPI_KEY"></span> <span data-i18n="labelRapid">RapidAPI — X-RapidAPI-Key</span></label>
+
+        <div class="api-input-group" style="margin-top:24px">
+          <label><span class="cfg-dot" id="dot-RAPIDAPI_KEY"></span> <span data-i18n="labelRapid">RapidAPI — X-RapidAPI-Key</span> <span style="color:var(--text-muted);font-weight:400">(<span data-i18n="optional">אופציונלי</span>)</span></label>
           <div class="api-input-row">
             <input type="password" class="api-input" id="cfg-RAPIDAPI_KEY" data-i18n-ph="apiPh" placeholder="הדביקו כאן את הערך..." />
             <button class="eye-btn" onclick="toggleEye('cfg-RAPIDAPI_KEY')">👁️</button>
           </div>
+        </div>
+        <button class="help-toggle" onclick="toggleHelp(this)">❓ <span data-i18n="howToGetRapid">איך משיגים מפתח RapidAPI חינמי?</span> <span class="chev">▾</span></button>
+        <div class="help-body">
+          <div class="tutorial-box">
+            <h3 data-i18n="rapidTutTitle">📖 איך משיגים מפתח RapidAPI חינמי</h3>
+            <div class="tutorial-step"><div class="step-number">1</div><div class="step-content"><strong data-i18n="rapidS1t">פותחים את עמוד ה-API</strong><p data-i18n="rapidS1p">היכנסו ל-<a href="https://rapidapi.com/ytjar/api/youtube-mp36" target="_blank" rel="noopener">YouTube MP3 (ytjar) ב-RapidAPI</a>.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">2</div><div class="step-content"><strong data-i18n="rapidS2t">נרשמים / מתחברים</strong><p data-i18n="rapidS2p">צרו חשבון חינמי (גם עם Google) או התחברו.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">3</div><div class="step-content"><strong data-i18n="rapidS3t">נרשמים לחבילה החינמית</strong><p data-i18n="rapidS3p">לחצו על <strong>Subscribe to Test</strong> ובחרו את חבילת <code>BASIC</code> החינמית (ללא כרטיס אשראי).</p></div></div>
+            <div class="tutorial-step"><div class="step-number">4</div><div class="step-content"><strong data-i18n="rapidS4t">מעתיקים את המפתח</strong><p data-i18n="rapidS4p">בלשונית <strong>Endpoints</strong>, תחת <strong>Header Parameters</strong>, העתיקו את הערך של <code>X-RapidAPI-Key</code>.</p></div></div>
+          </div>
+        </div>
+
+        <div class="api-save-bar">
+          <button class="save-btn" onclick="saveApiKeys()" data-i18n="saveApiKeys">💾 שמור מפתחות API</button>
+          <div class="api-status" data-i18n="apiStatusNote">🔒 המפתחות נשמרים מקומית בדפדפן בלבד.</div>
         </div>
       </div>
 
@@ -229,18 +259,24 @@
           </div>
         </div>
         <div class="setting-item">
+          <div><div class="setting-label" data-i18n="ytModeLabel">מצב קישור YouTube</div><div class="setting-desc" data-i18n="ytModeDesc">מה לעשות כשמדביקים קישור</div></div>
+          <div class="seg">
+            <button class="seg-btn" data-ytmode="download" onclick="setYtMode('download')" data-i18n="ytModeDownload">הורדה בלבד</button>
+            <button class="seg-btn" data-ytmode="transcribe" onclick="setYtMode('transcribe')" data-i18n="ytModeTranscribe">תמלול אוטומטי</button>
+          </div>
+        </div>
+        <div class="setting-item">
           <div><div class="setting-label" data-i18n="setSaveHistLabel">שמירת היסטוריה</div><div class="setting-desc" data-i18n="setSaveHistDesc">לזכור את התמלולים הקודמים</div></div>
-          <label class="toggle-switch"><input type="checkbox" id="set-save-history" checked><span class="slider"></span></label>
+          <label class="toggle-switch"><input type="checkbox" id="set-save-history" onchange="onToggleChange()" checked><span class="slider"></span></label>
         </div>
         <div class="setting-item">
           <div><div class="setting-label" data-i18n="setNotifLabel">התראות</div><div class="setting-desc" data-i18n="setNotifDesc">הודעות על הצלחה / שגיאה</div></div>
-          <label class="toggle-switch"><input type="checkbox" id="set-notifications" checked><span class="slider"></span></label>
+          <label class="toggle-switch"><input type="checkbox" id="set-notifications" onchange="onToggleChange()" checked><span class="slider"></span></label>
         </div>
         <div class="setting-item">
           <div><div class="setting-label" data-i18n="setDarkLabel">מצב כהה</div><div class="setting-desc" data-i18n="setDarkDesc">החלפה בין ערכת נושא בהירה לכהה</div></div>
           <label class="toggle-switch"><input type="checkbox" id="set-dark-mode" onchange="syncThemeFromToggle()"><span class="slider"></span></label>
         </div>
-        <button class="save-btn" onclick="saveSettings()" data-i18n="btnSaveSettings">💾 שמור הגדרות</button>
       </div>
 
       <!-- About -->
@@ -336,6 +372,11 @@ const T = {
     invalidUrl: 'קישור YouTube לא תקין', timeoutMsg: 'תם הזמן הקצוב להמרה', txFailed: 'התמלול נכשל',
     missingIvrit: 'חסרים מפתחות ivrit.ai — עברו להגדרות', missingRapid: 'חסר מפתח RapidAPI — עברו להגדרות',
     confirmClear: 'למחוק את כל ההיסטוריה והסטטיסטיקה?', srcRecord: 'הקלטה', srcUpload: 'קובץ', srcLink: 'יוטיוב',
+    apiKeysTitle: '🔑 מפתחות API', howToGetIvrit: 'איך משיגים את המפתחות של ivrit.ai?', howToGetRapid: 'איך משיגים מפתח RapidAPI חינמי?',
+    optional: 'אופציונלי', saveApiKeys: '💾 שמור מפתחות API', apiStatusNote: '🔒 המפתחות נשמרים מקומית בדפדפן בלבד.', apiSaved: 'המפתחות נשמרו ✅',
+    ytModeLabel: 'מצב קישור YouTube', ytModeDesc: 'מה לעשות כשמדביקים קישור', ytModeDownload: 'הורדה בלבד', ytModeTranscribe: 'תמלול אוטומטי',
+    btnConvertDownload: '🚀 המר והורד', btnConvertTranscribe: '🚀 המר ותמלל', btnTranscribeThis: '🎙️ תמלל את זה', showSource: 'הצג סרטון מקור / הורדה',
+    statusFetching: 'מוריד את האודיו לתמלול...', ytFetchFail: 'לא ניתן למשוך את האודיו לתמלול ישיר. הורידו את הקובץ וגררו ללשונית "תמלול".', langSwitchTitle: 'החלף שפה',
   },
   en: {
     title: 'Torah Lecture Transcription', h1: 'Lecture Transcription',
@@ -391,6 +432,11 @@ const T = {
     invalidUrl: 'Invalid YouTube URL', timeoutMsg: 'Conversion timed out', txFailed: 'Transcription failed',
     missingIvrit: 'Missing ivrit.ai keys — go to Settings', missingRapid: 'Missing RapidAPI key — go to Settings',
     confirmClear: 'Clear all history and stats?', srcRecord: 'Record', srcUpload: 'File', srcLink: 'YouTube',
+    apiKeysTitle: '🔑 API keys', howToGetIvrit: 'How do I get the ivrit.ai keys?', howToGetRapid: 'How do I get a free RapidAPI key?',
+    optional: 'optional', saveApiKeys: '💾 Save API keys', apiStatusNote: '🔒 Keys are stored locally in your browser only.', apiSaved: 'API keys saved ✅',
+    ytModeLabel: 'YouTube link mode', ytModeDesc: 'What happens when you paste a link', ytModeDownload: 'Download only', ytModeTranscribe: 'Auto-transcribe',
+    btnConvertDownload: '🚀 Convert & download', btnConvertTranscribe: '🚀 Convert & transcribe', btnTranscribeThis: '🎙️ Transcribe this', showSource: 'Show source video / download',
+    statusFetching: 'Fetching audio for transcription...', ytFetchFail: 'Couldn’t fetch the audio for direct transcription. Download the file and drop it into the "Transcribe" tab.', langSwitchTitle: 'Switch language',
   },
 };
 function t(k) { return (T[state.settings.lang] && T[state.settings.lang][k]) || T.he[k] || k; }
@@ -402,7 +448,7 @@ const state = {
   method: 'record', tab: 'transcribe',
   audioBase64: null, fileName: null, source: null,
   recording: false, lastTranscript: '', modalText: '', ytData: null, history: [],
-  settings: { lang: 'he', saveHistory: true, notifications: true, darkMode: false },
+  settings: { lang: 'he', saveHistory: true, notifications: true, darkMode: false, ytMode: 'download' },
   stats: { transcriptions: 0, downloads: 0, recordings: 0 },
   busy: false,
 };
@@ -434,11 +480,30 @@ function applyLang(lang) {
   document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.dataset.i18n; if (T[lang][k] != null) el.innerHTML = T[lang][k]; });
   document.querySelectorAll('[data-i18n-ph]').forEach(el => { const k = el.dataset.i18nPh; if (T[lang][k] != null) el.placeholder = T[lang][k]; });
   document.querySelectorAll('[data-i18n-title]').forEach(el => { const k = el.dataset.i18nTitle; if (T[lang][k] != null) el.title = T[lang][k]; });
-  document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  document.querySelectorAll('.seg-btn[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  document.querySelectorAll('.seg-btn[data-ytmode]').forEach(b => b.classList.toggle('active', b.dataset.ytmode === state.settings.ytMode));
+  document.getElementById('lang-label').textContent = lang === 'he' ? 'עב' : 'EN';
+  updateYtButtonLabel();
   if (state.lastTranscript) document.getElementById('t-wordcount').textContent = wc(state.lastTranscript);
   renderHistory();
 }
 function setLang(lang) { applyLang(lang); persistSettings(); }
+function toggleLang() { setLang(state.settings.lang === 'he' ? 'en' : 'he'); }
+function setYtMode(mode) {
+  state.settings.ytMode = mode; persistSettings();
+  document.querySelectorAll('.seg-btn[data-ytmode]').forEach(b => b.classList.toggle('active', b.dataset.ytmode === mode));
+  updateYtButtonLabel();
+}
+function updateYtButtonLabel() {
+  const btn = document.getElementById('yt-btn');
+  if (btn) btn.textContent = state.settings.ytMode === 'transcribe' ? t('btnConvertTranscribe') : t('btnConvertDownload');
+}
+function toggleHelp(btn) { btn.classList.toggle('open'); btn.nextElementSibling.classList.toggle('open'); }
+function onToggleChange() {
+  state.settings.saveHistory = document.getElementById('set-save-history').checked;
+  state.settings.notifications = document.getElementById('set-notifications').checked;
+  persistSettings();
+}
 function wc(text) { const words = (text.trim().match(/\S+/g) || []).length; return t('words') + ': ' + words + ' · ' + t('chars') + ': ' + text.length; }
 
 /* ═══════════════ Theme ═══════════════ */
@@ -633,16 +698,36 @@ async function convertYoutube() {
   if (!cfg.RAPIDAPI_KEY) { showToast(t('missingRapid'), 'error'); showTab('settings'); return; }
 
   hide('y-error'); hide('y-result');
+  document.getElementById('y-tx').style.display = 'none';
+  document.getElementById('y-source').style.display = '';
+  document.getElementById('y-source-toggle').style.display = 'none';
+  document.getElementById('y-source-toggle').classList.remove('open');
+  document.getElementById('y-transcribe-btn').style.display = '';
+  document.getElementById('y-main-badge').style.display = '';
+  document.getElementById('y-main-badge').textContent = t('badgeConvert');
+
   state.busy = true; document.getElementById('yt-btn').disabled = true;
   showLoading('y', t('statusConnecting')); setProgress('y', 30);
 
   try {
     const data = await resolveYoutube(videoId, cfg, (msg, pct) => { document.getElementById('y-loading-text').textContent = msg; setProgress('y', pct); });
-    setProgress('y', 100); hideLoading('y');
     state.ytData = { ...data, videoId, youtubeUrl: url };
-    showYoutubeResult(state.ytData);
     state.stats.downloads++; saveStats(); updateStats();
-    if (state.settings.notifications) showToast(t('convertDone'), 'success');
+    showYoutubeResult(state.ytData, false);
+
+    if (state.settings.ytMode === 'transcribe') {
+      const cfg2 = getCfg();
+      if (!cfg2.IVRIT_API_KEY || !cfg2.IVRIT_ENDPOINT_ID) {
+        setProgress('y', 100); hideLoading('y'); show('y-result');
+        showToast(t('missingIvrit'), 'error'); showTab('settings');
+      } else {
+        await doYoutubeTranscription(cfg2);
+      }
+    } else {
+      setProgress('y', 100); hideLoading('y'); show('y-result');
+      document.getElementById('y-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (state.settings.notifications) showToast(t('convertDone'), 'success');
+    }
   } catch (err) {
     hideLoading('y'); showError('y', err.message);
     if (state.settings.notifications) showToast('❌ ' + err.message, 'error');
@@ -667,13 +752,77 @@ async function resolveYoutube(videoId, cfg, onStatus) {
 function showYoutubeResult(data) {
   document.getElementById('y-thumb').src = 'https://img.youtube.com/vi/' + data.videoId + '/mqdefault.jpg';
   document.getElementById('y-title').textContent = data.title || '—';
-  if (data.duration) document.getElementById('y-duration').textContent = '⏱ ' + formatDuration(data.duration);
+  document.getElementById('y-duration').textContent = data.duration ? '⏱ ' + formatDuration(data.duration) : '';
   const dl = document.getElementById('y-download');
   dl.href = data.link || data.mp3Url || '#';
   dl.download = (data.title || 'audio') + '.mp3';
+}
+
+// Manual transcribe (download-only mode → user clicks "Transcribe this")
+async function transcribeYoutube() {
+  if (state.busy || !state.ytData) return;
+  const cfg = getCfg();
+  if (!cfg.IVRIT_API_KEY || !cfg.IVRIT_ENDPOINT_ID) { showToast(t('missingIvrit'), 'error'); showTab('settings'); return; }
+  state.busy = true; document.getElementById('yt-btn').disabled = true;
+  hide('y-error'); showLoading('y', t('statusFetching')); setProgress('y', 20);
+  try {
+    await doYoutubeTranscription(cfg);
+  } catch (err) {
+    hideLoading('y'); showError('y', err.message);
+    if (state.settings.notifications) showToast('❌ ' + err.message, 'error');
+  }
+  state.busy = false; document.getElementById('yt-btn').disabled = false;
+}
+
+// Shared: fetch the audio bytes → transcribe → render transcript in the YouTube tab
+async function doYoutubeTranscription(cfg) {
+  const link = state.ytData.link || state.ytData.mp3Url;
+  let base64;
+  try {
+    base64 = await fetchAudioBase64(link, (msg, pct) => { document.getElementById('y-loading-text').textContent = msg; setProgress('y', pct); });
+  } catch (e) {
+    throw new Error(t('ytFetchFail'));
+  }
+  const text = await transcribeViaRunpod(base64, cfg, (msg, pct) => { document.getElementById('y-loading-text').textContent = msg; setProgress('y', pct); });
+  setProgress('y', 100); hideLoading('y');
+
+  state.ytTranscript = text;
+  document.getElementById('y-text').textContent = text;
+  document.getElementById('y-wordcount').textContent = wc(text);
+  document.getElementById('y-tx').style.display = '';
+  document.getElementById('y-transcribe-btn').style.display = 'none';
+  document.getElementById('y-source').style.display = 'none';
+  document.getElementById('y-source-toggle').style.display = 'flex';
+  document.getElementById('y-source-toggle').classList.remove('open');
+  document.getElementById('y-main-badge').style.display = 'none';
   show('y-result');
   document.getElementById('y-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  state.stats.transcriptions++; saveStats(); updateStats();
+  if (state.settings.saveHistory) addHistory({ id: Date.now().toString(), source: 'link', timestamp: Date.now(), text });
+  if (state.settings.notifications) showToast(t('transcribeDone'), 'success');
 }
+
+async function fetchAudioBase64(url, onStatus) {
+  onStatus(t('statusFetching'), 45);
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error('audio ' + resp.status);
+  const buf = await resp.arrayBuffer();
+  return arrayBufferToBase64(buf);
+}
+function arrayBufferToBase64(buf) {
+  let binary = ''; const bytes = new Uint8Array(buf); const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  return btoa(binary);
+}
+function toggleYtSource() {
+  const src = document.getElementById('y-source');
+  const open = src.style.display !== 'none';
+  src.style.display = open ? 'none' : '';
+  document.getElementById('y-source-toggle').classList.toggle('open', !open);
+}
+function copyYtTranscript() { navigator.clipboard.writeText(state.ytTranscript || '').then(() => showToast(t('copied'), 'success')); }
+function downloadYtTranscript() { downloadText(state.ytTranscript || '', 'transcript'); }
 
 /* ═══════════════ Loading / error helpers ═══════════════ */
 function showLoading(p, text) {
@@ -779,19 +928,13 @@ function loadSettings() {
   applyLang(state.settings.lang || 'he');
 }
 function persistSettings() { localStorage.setItem(SKEY, JSON.stringify(state.settings)); }
-function saveSettings() {
-  state.settings.saveHistory = document.getElementById('set-save-history').checked;
-  state.settings.notifications = document.getElementById('set-notifications').checked;
-  persistSettings();
+function saveApiKeys() {
   const cfg = getCfg();
-  let changed = false;
-  CONFIG_KEYS.forEach(k => { const v = document.getElementById('cfg-' + k).value.trim(); if (v) { cfg[k] = v; changed = true; } });
-  if (changed) {
-    setCfg(cfg);
-    CONFIG_KEYS.forEach(k => { document.getElementById('cfg-' + k).value = ''; });
-  }
+  CONFIG_KEYS.forEach(k => { const v = document.getElementById('cfg-' + k).value.trim(); if (v) cfg[k] = v; });
+  setCfg(cfg);
+  CONFIG_KEYS.forEach(k => { document.getElementById('cfg-' + k).value = ''; });
   refreshConfigDots(); checkBanners();
-  showToast(t('settingsSaved'), 'success');
+  showToast(t('apiSaved'), 'success');
 }
 function refreshConfigDots() {
   const cfg = getCfg();
