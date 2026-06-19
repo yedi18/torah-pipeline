@@ -1,1718 +1,850 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he" dir="rtl" data-theme="light">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Torah Pipeline</title>
-<style>
-/* ── Design tokens ─────────────────────────────────────────────────────────── */
-:root {
-  --bg: linear-gradient(135deg, #060614 0%, #0d0b2e 40%, #1a0533 100%);
-  --surface: rgba(255,255,255,0.04);
-  --surface-hover: rgba(255,255,255,0.08);
-  --border: rgba(255,255,255,0.08);
-  --accent: #7c3aed;
-  --accent2: #2563eb;
-  --success: #10b981;
-  --error: #ef4444;
-  --warning: #f59e0b;
-  --text: #f1f5f9;
-  --text-muted: #94a3b8;
-  --blur: blur(20px);
-  --radius: 16px;
-  --radius-sm: 10px;
-}
-
-/* ── Reset ─────────────────────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 16px; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  direction: rtl;
-  line-height: 1.6;
-}
-
-/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
-
-/* ── Keyframes ─────────────────────────────────────────────────────────────── */
-@keyframes pulse-ring {
-  0%   { box-shadow: 0 0 0 0 rgba(124,58,237,0.6); }
-  70%  { box-shadow: 0 0 0 10px rgba(124,58,237,0); }
-  100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
-}
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes slideDown {
-  from { opacity: 0; max-height: 0; transform: translateY(-6px); }
-  to   { opacity: 1; max-height: 2000px; transform: translateY(0); }
-}
-@keyframes toastIn {
-  from { opacity: 0; transform: translateX(20px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes toastOut {
-  from { opacity: 1; transform: translateX(0); }
-  to   { opacity: 0; transform: translateX(20px); }
-}
-@keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-/* ── Header ────────────────────────────────────────────────────────────────── */
-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  background: rgba(6,6,20,0.7);
-  border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.header-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-}
-.header-brand-icon { font-size: 1.5rem; }
-.header-nav { display: flex; gap: 4px; }
-.nav-btn {
-  background: none;
-  border: 1px solid transparent;
-  color: var(--text-muted);
-  padding: 8px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-.nav-btn:hover { color: var(--text); background: var(--surface-hover); }
-.nav-btn.active {
-  color: var(--text);
-  background: var(--surface-hover);
-  border-color: var(--border);
-}
-
-/* ── Main layout ───────────────────────────────────────────────────────────── */
-main {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 32px 24px 80px;
-  animation: fadeIn 0.4s ease;
-}
-
-/* ── Views ─────────────────────────────────────────────────────────────────── */
-.view { display: none; }
-.view.active { display: block; animation: fadeIn 0.3s ease; }
-
-/* ── Input card ────────────────────────────────────────────────────────────── */
-.input-card {
-  background: var(--surface);
-  backdrop-filter: var(--blur);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px 24px;
-  margin-bottom: 28px;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-.url-input {
-  flex: 1;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  padding: 12px 16px;
-  font-size: 0.95rem;
-  font-family: inherit;
-  direction: ltr;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  outline: none;
-}
-.url-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
-}
-.url-input::placeholder { color: var(--text-muted); }
-
-.start-btn {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border: none;
-  color: #fff;
-  padding: 12px 24px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 600;
-  font-family: inherit;
-  white-space: nowrap;
-  transition: opacity 0.2s, transform 0.1s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.start-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-.start-btn:active:not(:disabled) { transform: translateY(0); }
-.start-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* ── Timeline ──────────────────────────────────────────────────────────────── */
-.timeline {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-.timeline::before {
-  content: '';
-  position: absolute;
-  right: 23px;
-  top: 24px;
-  bottom: 24px;
-  width: 2px;
-  background: linear-gradient(to bottom, var(--accent), rgba(124,58,237,0.1));
-  z-index: 0;
-}
-
-/* ── Step card ─────────────────────────────────────────────────────────────── */
-.step-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 4px;
-  animation: fadeIn 0.3s ease both;
-}
-.step-card:nth-child(1) { animation-delay: 0.05s; }
-.step-card:nth-child(2) { animation-delay: 0.10s; }
-.step-card:nth-child(3) { animation-delay: 0.15s; }
-.step-card:nth-child(4) { animation-delay: 0.20s; }
-.step-card:nth-child(5) { animation-delay: 0.25s; }
-
-.step-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: var(--surface);
-  backdrop-filter: var(--blur);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 20px;
-  position: relative;
-  z-index: 1;
-  transition: border-color 0.3s, background 0.3s;
-  margin-bottom: 2px;
-}
-.step-card.active .step-header {
-  border-color: rgba(124,58,237,0.4);
-  background: rgba(124,58,237,0.06);
-}
-.step-card.done .step-header { border-color: rgba(16,185,129,0.3); }
-.step-card.error .step-header {
-  border-color: rgba(239,68,68,0.4);
-  background: rgba(239,68,68,0.05);
-}
-
-/* Indicator dot */
-.step-dot {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background: rgba(255,255,255,0.1);
-  border: 2px solid rgba(255,255,255,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.65rem;
-  transition: all 0.3s;
-}
-.step-card.active .step-dot {
-  background: var(--accent);
-  border-color: var(--accent);
-  animation: pulse-ring 1.5s infinite;
-}
-.step-card.done .step-dot { background: var(--success); border-color: var(--success); }
-.step-card.error .step-dot { background: var(--error); border-color: var(--error); }
-
-/* Step icon + info */
-.step-icon {
-  font-size: 1.3rem;
-  width: 32px;
-  text-align: center;
-  flex-shrink: 0;
-}
-.step-info { flex: 1; min-width: 0; }
-.step-name {
-  font-weight: 600;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.step-status {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.step-card.active .step-status { color: #a78bfa; }
-.step-card.done .step-status   { color: #6ee7b7; }
-.step-card.error .step-status  { color: #fca5a5; }
-
-/* Step meta: time + toggle */
-.step-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-.step-elapsed {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-  min-width: 42px;
-  text-align: left;
-}
-.step-card.done .step-elapsed  { color: #6ee7b7; }
-.step-card.error .step-elapsed { color: #fca5a5; }
-
-.toggle-btn {
-  background: rgba(255,255,255,0.07);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  padding: 5px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.78rem;
-  font-family: inherit;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-.toggle-btn:hover { background: var(--surface-hover); color: var(--text); }
-
-/* Spinner for active */
-.spinner {
-  width: 12px;
-  height: 12px;
-  border: 2px solid rgba(124,58,237,0.3);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  display: inline-block;
-}
-
-/* ── Output panel ──────────────────────────────────────────────────────────── */
-.step-output {
-  display: none;
-  background: rgba(0,0,0,0.25);
-  border: 1px solid var(--border);
-  border-top: none;
-  border-radius: 0 0 var(--radius) var(--radius);
-  padding: 20px;
-  margin-bottom: 10px;
-}
-.step-output.open { display: block; animation: slideDown 0.25s ease; }
-
-/* Audio player (step 1) */
-.audio-section { display: flex; flex-direction: column; gap: 12px; }
-.audio-section audio {
-  width: 100%;
-  height: 40px;
-  accent-color: var(--accent);
-}
-.output-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
-/* Text output (step 2, 4) */
-.text-output {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 16px;
-  max-height: 300px;
-  overflow-y: auto;
-  font-size: 0.88rem;
-  line-height: 1.8;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-/* Final combined text — Word-ready (David/Narkisim 14pt double spacing) */
-.final-text-label {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.final-text {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 20px 24px;
-  max-height: 420px;
-  overflow-y: auto;
-  font-family: 'David', 'Narkisim', 'Arial', serif;
-  font-size: 14pt;
-  line-height: 2;
-  white-space: pre-wrap;
-  word-break: break-word;
-  direction: rtl;
-  text-align: right;
-  color: var(--text);
-}
-
-/* Per-part collapsible sections */
-.gpt-parts-label {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  margin: 14px 0 6px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.gpt-part-section { margin-bottom: 6px; }
-.gpt-part-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 14px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  transition: background 0.15s;
-}
-.gpt-part-header:hover { background: var(--surface-hover); color: var(--text); }
-.gpt-part-body {
-  display: none;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border);
-  border-top: none;
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-  padding: 14px 18px;
-  font-family: 'David', 'Narkisim', 'Arial', serif;
-  font-size: 13pt;
-  line-height: 1.9;
-  white-space: pre-wrap;
-  direction: rtl;
-  text-align: right;
-  max-height: 320px;
-  overflow-y: auto;
-}
-.gpt-part-body.open { display: block; }
-
-/* Side-by-side columns (step 3) */
-.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-@media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
-.compare-col-label {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Download button (step 5) */
-.download-big {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 32px;
-}
-.download-big-btn {
-  background: linear-gradient(135deg, var(--success), #059669);
-  border: none;
-  color: #fff;
-  padding: 16px 40px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 1.1rem;
-  font-weight: 700;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: opacity 0.2s, transform 0.1s;
-  box-shadow: 0 4px 24px rgba(16,185,129,0.25);
-}
-.download-big-btn:hover { opacity: 0.9; transform: translateY(-2px); }
-
-/* ── Action buttons ────────────────────────────────────────────────────────── */
-.action-btn {
-  background: rgba(255,255,255,0.07);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 7px 14px;
-  border-radius: 7px;
-  cursor: pointer;
-  font-size: 0.82rem;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-.action-btn:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.18); }
-.action-btn.primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border-color: transparent;
-  color: #fff;
-}
-.action-btn.primary:hover { opacity: 0.9; }
-
-/* ── History view ──────────────────────────────────────────────────────────── */
-.history-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-.history-title { font-size: 1.1rem; font-weight: 700; }
-.history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-.history-empty {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-}
-.history-card {
-  background: var(--surface);
-  backdrop-filter: var(--blur);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  transition: border-color 0.2s, transform 0.2s;
-  animation: fadeIn 0.3s ease both;
-}
-.history-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
-.history-thumb {
-  width: 100%;
-  aspect-ratio: 16/9;
-  object-fit: cover;
-  background: rgba(255,255,255,0.05);
-  display: block;
-}
-.history-thumb-placeholder {
-  width: 100%;
-  aspect-ratio: 16/9;
-  background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(37,99,235,0.15));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-}
-.history-body { padding: 14px 16px; }
-.history-title-text {
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: 6px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.history-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-}
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 0.72rem;
-  font-weight: 600;
-}
-.status-badge.done    { background: rgba(16,185,129,0.15); color: #6ee7b7; }
-.status-badge.error   { background: rgba(239,68,68,0.15);  color: #fca5a5; }
-.status-badge.running { background: rgba(124,58,237,0.15); color: #a78bfa; }
-
-/* Resume submenu */
-.resume-btn-wrap { position: relative; }
-.resume-main-btn {
-  width: 100%;
-  background: rgba(124,58,237,0.15);
-  border: 1px solid rgba(124,58,237,0.3);
-  color: #a78bfa;
-  padding: 9px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-family: inherit;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: all 0.2s;
-}
-.resume-main-btn:hover { background: rgba(124,58,237,0.25); }
-.resume-submenu {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  right: 0;
-  left: 0;
-  background: #1a1040;
-  border: 1px solid rgba(124,58,237,0.3);
-  border-radius: 10px;
-  overflow: hidden;
-  z-index: 50;
-  animation: fadeIn 0.2s ease;
-  display: none;
-}
-.resume-submenu.open { display: block; }
-.resume-submenu-item {
-  padding: 11px 14px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: background 0.15s;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.resume-submenu-item:last-child { border-bottom: none; }
-.resume-submenu-item:hover { background: rgba(124,58,237,0.15); }
-
-/* ── Resume edit dialog ────────────────────────────────────────────────────── */
-.resume-dlg-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.65);
-  z-index: 200;
-  justify-content: center;
-  align-items: center;
-  backdrop-filter: blur(4px);
-  padding: 16px;
-}
-.resume-dlg-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
-.resume-dlg-box {
-  background: #0f0d2a;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  width: 100%;
-  max-width: 720px;
-  max-height: 88vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
-  animation: fadeIn 0.2s ease;
-}
-.resume-dlg-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
-}
-.resume-dlg-title { font-size: 1rem; font-weight: 700; }
-.resume-dlg-step-badge {
-  font-size: 0.75rem;
-  padding: 2px 10px;
-  border-radius: 20px;
-  background: rgba(124,58,237,0.2);
-  color: var(--accent);
-  border: 1px solid rgba(124,58,237,0.3);
-}
-.resume-dlg-close {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  border-radius: 6px;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.resume-dlg-close:hover { background: var(--surface-hover); color: var(--text); }
-.resume-dlg-hint {
-  padding: 10px 20px 0;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-}
-.resume-dlg-body { flex: 1; overflow: hidden; padding: 12px 20px 16px; display: flex; flex-direction: column; }
-.resume-dlg-textarea {
-  flex: 1;
-  width: 100%;
-  min-height: 280px;
-  max-height: 52vh;
-  resize: vertical;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-family: 'David', 'Narkisim', 'Arial', serif;
-  font-size: 13pt;
-  line-height: 1.85;
-  padding: 14px 16px;
-  direction: rtl;
-  text-align: right;
-  outline: none;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-}
-.resume-dlg-textarea:focus { border-color: var(--accent); }
-.resume-dlg-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 14px 20px;
-  border-top: 1px solid var(--border);
-}
-
-/* ── Modal ─────────────────────────────────────────────────────────────────── */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.75);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  backdrop-filter: blur(4px);
-}
-.modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
-.modal-box {
-  background: #0f0d2a;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  width: 100%;
-  max-width: 900px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  animation: fadeIn 0.25s ease;
-}
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 22px;
-  border-bottom: 1px solid var(--border);
-}
-.modal-title { font-size: 1rem; font-weight: 700; }
-.modal-close {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-.modal-close:hover { background: var(--surface-hover); color: var(--text); }
-.modal-tabs {
-  display: flex;
-  gap: 4px;
-  padding: 0 22px;
-  border-bottom: 1px solid var(--border);
-}
-.modal-tab {
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--text-muted);
-  padding: 12px 16px;
-  cursor: pointer;
-  font-size: 0.88rem;
-  font-family: inherit;
-  font-weight: 500;
-  margin-bottom: -1px;
-  transition: all 0.2s;
-}
-.modal-tab:hover { color: var(--text); }
-.modal-tab.active { color: var(--text); border-bottom-color: var(--accent); }
-.modal-body { flex: 1; overflow-y: auto; padding: 20px 22px; }
-.modal-text {
-  font-size: 0.9rem;
-  line-height: 1.9;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.modal-footer {
-  padding: 16px 22px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  gap: 10px;
-}
-
-/* ── Toast ─────────────────────────────────────────────────────────────────── */
-#toast-container {
-  position: fixed;
-  bottom: 24px;
-  left: 24px;
-  z-index: 300;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: none;
-}
-.toast {
-  background: rgba(30,27,75,0.95);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 18px;
-  font-size: 0.87rem;
-  color: var(--text);
-  backdrop-filter: var(--blur);
-  animation: toastIn 0.25s ease forwards;
-  pointer-events: all;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 320px;
-}
-.toast.out { animation: toastOut 0.25s ease forwards; }
-
-/* ── Section title ─────────────────────────────────────────────────────────── */
-.section-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-muted);
-  margin-bottom: 14px;
-}
-
-/* ── Responsive ────────────────────────────────────────────────────────────── */
-@media (max-width: 600px) {
-  main { padding: 20px 14px 60px; }
-  .input-card { flex-direction: column; }
-  .start-btn  { width: 100%; justify-content: center; }
-  .timeline::before { right: 19px; }
-  header { padding: 0 14px; }
-}
-</style>
+<title>תמלול שיעורי תורה</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<!-- ── Header ─────────────────────────────────────────────────────────────── -->
-<header>
-  <div class="header-brand">
-    <span class="header-brand-icon">&#128214;</span>
-    <span>Torah Pipeline</span>
-  </div>
-  <nav class="header-nav">
-    <button class="nav-btn active" id="nav-process" onclick="switchView('process')">&#1506;&#1497;&#1489;&#1493;&#1491;</button>
-    <button class="nav-btn" id="nav-history" onclick="switchView('history')">&#1492;&#1497;&#1505;&#1496;&#1493;&#1512;&#1497;&#1492;</button>
-  </nav>
-</header>
-
-<!-- ── Main ───────────────────────────────────────────────────────────────── -->
-<main>
-
-  <!-- ── Process view ─────────────────────────────────────────────────────── -->
-  <div class="view active" id="view-process">
-
-    <div class="input-card">
-      <input
-        class="url-input"
-        id="youtube-url"
-        type="url"
-        placeholder="https://www.youtube.com/watch?v=..."
-        autocomplete="off"
-        spellcheck="false"
-      />
-      <button class="start-btn" id="start-btn" onclick="startPipeline()">
-        <span id="start-icon">&#9654;</span>
-        <span id="start-label">התחל</span>
-      </button>
-    </div>
-
-    <div class="section-label">שלבי העיבוד</div>
-
-    <div class="timeline" id="timeline">
-
-      <!-- Step 1: Audio download -->
-      <div class="step-card waiting" id="step-card-1">
-        <div class="step-header">
-          <div class="step-dot" id="step-dot-1"></div>
-          <div class="step-icon">&#127925;</div>
-          <div class="step-info">
-            <div class="step-name">הורדת אודיו</div>
-            <div class="step-status" id="step-status-1">ממתין...</div>
-          </div>
-          <div class="step-meta">
-            <span class="step-elapsed" id="step-elapsed-1"></span>
-            <button class="toggle-btn" id="toggle-1" onclick="toggleOutput(1)" style="display:none">הצג &#9660;</button>
-          </div>
-        </div>
-        <div class="step-output" id="step-output-1">
-          <div class="audio-section">
-            <audio id="audio-player-1" controls style="display:none"></audio>
-            <div class="output-actions">
-              <button class="action-btn" id="mp3-download-btn" onclick="downloadMp3()" style="display:none">
-                &#8595; הורד MP3
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 2: Transcription -->
-      <div class="step-card waiting" id="step-card-2">
-        <div class="step-header">
-          <div class="step-dot" id="step-dot-2"></div>
-          <div class="step-icon">&#127897;</div>
-          <div class="step-info">
-            <div class="step-name">תמלול</div>
-            <div class="step-status" id="step-status-2">ממתין...</div>
-          </div>
-          <div class="step-meta">
-            <span class="step-elapsed" id="step-elapsed-2"></span>
-            <button class="toggle-btn" id="toggle-2" onclick="toggleOutput(2)" style="display:none">הצג &#9660;</button>
-          </div>
-        </div>
-        <div class="step-output" id="step-output-2">
-          <div class="output-actions" style="margin-bottom:10px">
-            <button class="action-btn" onclick="copyText('transcription')">&#128203; העתק</button>
-            <button class="action-btn" onclick="openModal(2)">&#9974; הרחב</button>
-          </div>
-          <div class="text-output" id="transcription-text"></div>
-        </div>
-      </div>
-
-      <!-- Step 3: Claude proofread + split -->
-      <div class="step-card waiting" id="step-card-3">
-        <div class="step-header">
-          <div class="step-dot" id="step-dot-3"></div>
-          <div class="step-icon">&#129302;</div>
-          <div class="step-info">
-            <div class="step-name">הגהה וחלוקה (Claude)</div>
-            <div class="step-status" id="step-status-3">ממתין...</div>
-          </div>
-          <div class="step-meta">
-            <span class="step-elapsed" id="step-elapsed-3"></span>
-            <button class="toggle-btn" id="toggle-3" onclick="toggleOutput(3)" style="display:none">הצג &#9660;</button>
-          </div>
-        </div>
-        <div class="step-output" id="step-output-3">
-          <div class="output-actions" style="margin-bottom:12px">
-            <button class="action-btn" onclick="openModal(3)">&#9974; הרחב השוואה</button>
-          </div>
-          <div class="compare-grid">
-            <div>
-              <div class="compare-col-label">לפני (תמלול)</div>
-              <div class="text-output" id="compare-before-3"></div>
-            </div>
-            <div>
-              <div class="compare-col-label">אחרי (הגהת Claude)</div>
-              <div class="text-output" id="compare-after-3"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 4: GPT rewrite -->
-      <div class="step-card waiting" id="step-card-4">
-        <div class="step-header">
-          <div class="step-dot" id="step-dot-4"></div>
-          <div class="step-icon">&#9997;&#65039;</div>
-          <div class="step-info">
-            <div class="step-name">שכתוב (GPT)</div>
-            <div class="step-status" id="step-status-4">ממתין...</div>
-          </div>
-          <div class="step-meta">
-            <span class="step-elapsed" id="step-elapsed-4"></span>
-            <button class="toggle-btn" id="toggle-4" onclick="toggleOutput(4)" style="display:none">הצג &#9660;</button>
-          </div>
-        </div>
-        <div class="step-output" id="step-output-4">
-          <div class="output-actions" style="margin-bottom:10px">
-            <button class="action-btn" onclick="copyText('combined')">&#128203; העתק טקסט מלא</button>
-            <button class="action-btn" onclick="openModal(4)">&#9974; הרחב</button>
-          </div>
-          <div class="final-text-label">טקסט סופי — מוכן להדבקה ב-Word</div>
-          <div class="final-text" id="combined-text"></div>
-          <div id="gpt-parts-container"></div>
-        </div>
-      </div>
-
-      <!-- Step 5: Word export -->
-      <div class="step-card waiting" id="step-card-5">
-        <div class="step-header">
-          <div class="step-dot" id="step-dot-5"></div>
-          <div class="step-icon">&#128196;</div>
-          <div class="step-info">
-            <div class="step-name">ייצוא Word</div>
-            <div class="step-status" id="step-status-5">ממתין...</div>
-          </div>
-          <div class="step-meta">
-            <span class="step-elapsed" id="step-elapsed-5"></span>
-            <button class="toggle-btn" id="toggle-5" onclick="toggleOutput(5)" style="display:none">הצג &#9660;</button>
-          </div>
-        </div>
-        <div class="step-output" id="step-output-5">
-          <div class="download-big" id="download-area-5">
-            <div style="color:var(--text-muted);font-size:0.9rem">הקובץ יהיה זמין כאן לאחר סיום העיבוד</div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /timeline -->
-  </div><!-- /view-process -->
-
-  <!-- ── History view ──────────────────────────────────────────────────────── -->
-  <div class="view" id="view-history">
-    <div class="history-header">
-      <div class="history-title">היסטוריית עיבודים</div>
-      <button class="action-btn" onclick="clearHistory()">&#128465; נקה הכל</button>
-    </div>
-    <div class="history-grid" id="history-grid">
-      <div class="history-empty" id="history-empty">
-        <div style="font-size:2.5rem;margin-bottom:12px">&#128461;</div>
-        <div>אין עיבודים בהיסטוריה</div>
-      </div>
-    </div>
-  </div>
-
-</main>
-
-<!-- ── Modal ──────────────────────────────────────────────────────────────── -->
-<div class="modal-overlay" id="modal-overlay" onclick="handleModalOverlayClick(event)">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title" id="modal-title">תצוגה מורחבת</div>
-      <button class="modal-close" onclick="closeModal()">&#10005;</button>
-    </div>
-    <div class="modal-tabs" id="modal-tabs" style="display:none">
-      <button class="modal-tab active" id="modal-tab-before" onclick="switchModalTab('before')">לפני</button>
-      <button class="modal-tab" id="modal-tab-after" onclick="switchModalTab('after')">אחרי</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-text" id="modal-text"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="action-btn primary" onclick="copyModalText()">&#128203; העתק</button>
-      <button class="action-btn" onclick="downloadModalText()">&#8595; הורד טקסט</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── Resume edit dialog ────────────────────────────────────────────────── -->
-<div class="resume-dlg-overlay" id="resume-dlg-overlay" onclick="handleResumeDlgOverlayClick(event)">
-  <div class="resume-dlg-box" onclick="event.stopPropagation()">
-    <div class="resume-dlg-header">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="resume-dlg-title" id="resume-dlg-title">המשך עיבוד</div>
-        <div class="resume-dlg-step-badge" id="resume-dlg-badge"></div>
-      </div>
-      <button class="resume-dlg-close" onclick="closeResumeDlg()">&#10005;</button>
-    </div>
-    <div class="resume-dlg-hint" id="resume-dlg-hint"></div>
-    <div class="resume-dlg-body">
-      <textarea class="resume-dlg-textarea" id="resume-dlg-textarea" dir="rtl" spellcheck="false"></textarea>
-    </div>
-    <div class="resume-dlg-footer">
-      <button class="action-btn" onclick="closeResumeDlg()">ביטול</button>
-      <button class="action-btn primary" id="resume-dlg-confirm-btn" onclick="confirmResumeDlg()">המשך &#9654;</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── Toast container ────────────────────────────────────────────────────── -->
 <div id="toast-container"></div>
 
+<div class="container">
+
+  <!-- ═══ Header ═══ -->
+  <div class="header">
+    <div class="logo-section">
+      <div class="logo-icon">📖</div>
+      <h1 data-i18n="h1">תמלול שיעורים</h1>
+      <p class="subtitle" data-i18n="subtitle">תמלול מהיר ופשוט · הקלטה, קובץ או יוטיוב</p>
+    </div>
+    <div class="header-buttons">
+      <button class="icon-btn theme-btn" onclick="toggleTheme()" data-i18n-title="titleTheme" title="מצב כהה / בהיר">
+        <span class="sun">☀️</span><span class="moon">🌙</span>
+      </button>
+      <button class="icon-btn" onclick="showTab('history')" data-i18n-title="titleHistory" title="היסטוריה">📜</button>
+      <button class="icon-btn" onclick="showTab('settings')" data-i18n-title="titleSettings" title="הגדרות">⚙️</button>
+    </div>
+  </div>
+
+  <!-- ═══ Tabs ═══ -->
+  <div class="tabs">
+    <button class="tab active" data-tab="transcribe" onclick="showTab('transcribe')" data-i18n="tabTranscribe">🎙️ תמלול</button>
+    <button class="tab" data-tab="youtube" onclick="showTab('youtube')" data-i18n="tabYoutube">🔗 הורדה מיוטיוב</button>
+    <button class="tab" data-tab="history" onclick="showTab('history')" data-i18n="tabHistory">📜 היסטוריה</button>
+    <button class="tab" data-tab="settings" onclick="showTab('settings')" data-i18n="tabSettings">⚙️ הגדרות</button>
+  </div>
+
+  <!-- ═══ Transcribe tab ═══ -->
+  <div id="transcribe-tab" class="tab-content active">
+    <div class="config-banner" id="t-banner">
+      <span>⚠️</span><span data-i18n="bannerText">כדי לתמלל צריך להגדיר את מפתחות ivrit.ai.</span>
+      <button class="cb-btn" onclick="showTab('settings')" data-i18n="bannerBtn">פתחו הגדרות</button>
+    </div>
+
+    <div class="info-box"><p data-i18n="infoTranscribe">בחרו דרך: <strong>הקלטה</strong> ישירות מהמיקרופון או <strong>העלאת קובץ</strong> שמע/וידאו — ולחצו <strong>תמלל</strong>. התמלול נשמר אוטומטית בהיסטוריה.</p></div>
+
+    <div class="method-grid">
+      <div class="method-card selected" id="method-record" onclick="selectMethod('record')">
+        <div class="method-icon">🎙️</div>
+        <div class="method-title" data-i18n="methodRecordTitle">הקלטה</div>
+        <div class="method-subtitle" data-i18n="methodRecordSub">הקליטו מהמיקרופון</div>
+      </div>
+      <div class="method-card" id="method-upload" onclick="selectMethod('upload')">
+        <div class="method-icon">📁</div>
+        <div class="method-title" data-i18n="methodUploadTitle">העלאת קובץ</div>
+        <div class="method-subtitle" data-i18n="methodUploadSub">MP3, M4A, WAV, MP4…</div>
+      </div>
+    </div>
+
+    <!-- Record pane -->
+    <div class="method-pane active" id="pane-record">
+      <div class="record-zone">
+        <button class="rec-circle" id="rec-btn" onclick="toggleRecording()">🎙️</button>
+        <div class="rec-timer" id="rec-timer" style="display:none">00:00</div>
+        <div class="rec-wave" id="rec-wave" style="display:none">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="rec-hint" id="rec-hint" data-i18n="recIdle">לחצו כדי להתחיל להקליט</div>
+        <audio id="rec-audio" controls style="display:none"></audio>
+      </div>
+    </div>
+
+    <!-- Upload pane -->
+    <div class="method-pane" id="pane-upload">
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+        <div class="dropzone-icon">📤</div>
+        <div class="dropzone-title" data-i18n="dropTitle">גררו קובץ לכאן או לחצו לבחירה</div>
+        <div class="dropzone-sub" data-i18n="dropSub">קבצי שמע ווידאו עד כ-100MB</div>
+      </div>
+      <input type="file" id="file-input" accept="audio/*,video/*" style="display:none" />
+      <div class="file-chip" id="file-chip">
+        <span class="fc-icon">🎵</span>
+        <span class="fc-name" id="fc-name"></span>
+        <span class="fc-size" id="fc-size"></span>
+        <span class="fc-x" onclick="clearFile()">✕</span>
+      </div>
+    </div>
+
+    <button class="action-btn-lg" id="transcribe-btn" onclick="startTranscription()" data-i18n="btnTranscribe">✨ תמלל</button>
+
+    <div class="loading" id="t-loading">
+      <div class="waveform"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="progress-bar"><div class="progress-fill" id="t-progress-fill"></div></div>
+      <p class="loading-text" id="t-loading-text">מתמלל...</p>
+      <p class="loading-elapsed" id="t-loading-elapsed"></p>
+    </div>
+
+    <div class="error" id="t-error"></div>
+
+    <div class="result" id="t-result">
+      <div class="transcript-head">
+        <div class="success-badge" data-i18n="badgeTranscript">✅ התמלול מוכן</div>
+        <div class="result-actions" style="flex:0">
+          <button class="secondary-btn" onclick="copyTranscript()" data-i18n="btnCopy">📋 העתק</button>
+          <button class="secondary-btn" onclick="downloadTranscript()" data-i18n="btnDownloadTxt">⬇️ הורד טקסט</button>
+        </div>
+      </div>
+      <div class="transcript-box" id="t-text"></div>
+      <div class="word-count" id="t-wordcount"></div>
+      <div class="future-note" data-i18n="futureNote">✨ בקרוב: שכתוב, הגהה וסיכום אוטומטי עם Claude — ישירות מכאן.</div>
+    </div>
+  </div>
+
+  <!-- ═══ YouTube tab ═══ -->
+  <div id="youtube-tab" class="tab-content">
+    <div class="config-banner" id="y-banner">
+      <span>⚠️</span><span data-i18n="bannerRapid">כדי להוריד מיוטיוב צריך מפתח RapidAPI.</span>
+      <button class="cb-btn" onclick="showTab('settings')" data-i18n="bannerBtn">פתחו הגדרות</button>
+    </div>
+
+    <div class="info-box"><p data-i18n="infoYoutube">הדביקו קישור YouTube כדי <strong>להוריד את האודיו</strong> למחשב.</p></div>
+
+    <div class="input-wrapper">
+      <span class="input-icon">🔗</span>
+      <input type="text" id="yt-url" class="url-input" data-i18n-ph="ytPlaceholder" placeholder="https://youtube.com/watch?v=...  או  youtu.be/..." />
+      <div class="input-actions">
+        <button class="input-action-btn paste-btn" onclick="pasteUrl()" data-i18n="btnPaste">📋 הדבק</button>
+        <button class="input-action-btn clear-input-btn" onclick="clearUrl()">✕</button>
+      </div>
+    </div>
+
+    <button class="action-btn-lg" id="yt-btn" onclick="convertYoutube()" data-i18n="btnConvert">🚀 המר והורד</button>
+
+    <div class="loading" id="y-loading">
+      <div class="waveform"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="progress-bar"><div class="progress-fill" id="y-progress-fill"></div></div>
+      <p class="loading-text" id="y-loading-text">ממיר...</p>
+    </div>
+
+    <div class="error" id="y-error"></div>
+
+    <div class="result" id="y-result">
+      <div class="success-badge" data-i18n="badgeConvert">✅ ההמרה הושלמה</div>
+      <div class="video-preview">
+        <img id="y-thumb" class="video-thumbnail" src="" alt="thumbnail" />
+        <div class="video-info">
+          <div class="video-title" id="y-title"></div>
+          <div class="video-meta"><span id="y-duration">⏱ --:--</span></div>
+        </div>
+      </div>
+      <div class="result-actions">
+        <a href="#" id="y-download" class="download-btn" data-i18n="btnDownloadAudio">⬇️ הורד אודיו</a>
+      </div>
+      <div class="future-note" data-i18n="ytHint">💡 להורדה בלבד. כדי לתמלל — הורידו את הקובץ וגררו אותו ללשונית "תמלול".</div>
+    </div>
+  </div>
+
+  <!-- ═══ History tab ═══ -->
+  <div id="history-tab" class="tab-content">
+    <div class="settings-title" data-i18n="historyTitle">📜 היסטוריית תמלולים</div>
+    <input type="text" class="search-box" id="history-search" data-i18n-ph="searchPh" placeholder="חיפוש בהיסטוריה..." oninput="renderHistory()" />
+    <div class="history-section" id="history-list"></div>
+    <button class="clear-btn" id="clear-history-btn" onclick="clearHistory()" style="display:none" data-i18n="clearHistory">🗑️ נקה את כל ההיסטוריה</button>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-number" id="stat-transcriptions">0</div><div class="stat-label" data-i18n="statTranscriptions">תמלולים</div></div>
+      <div class="stat-card"><div class="stat-number" id="stat-downloads">0</div><div class="stat-label" data-i18n="statDownloads">הורדות מיוטיוב</div></div>
+      <div class="stat-card"><div class="stat-number" id="stat-recordings">0</div><div class="stat-label" data-i18n="statRecordings">הקלטות</div></div>
+    </div>
+  </div>
+
+  <!-- ═══ Settings tab ═══ -->
+  <div id="settings-tab" class="tab-content">
+    <div class="settings-section">
+
+      <!-- ivrit.ai -->
+      <div class="settings-group">
+        <div class="settings-title" data-i18n="setIvritTitle">🗝️ הגדרת התמלול (ivrit.ai)</div>
+        <div class="tutorial-box">
+          <h3 data-i18n="ivritTutTitle">📖 איך משיגים את המפתחות של ivrit.ai</h3>
+          <div class="tutorial-step"><div class="step-number">1</div><div class="step-content"><strong data-i18n="ivritS1t">נכנסים ל-RunPod</strong><p data-i18n="ivritS1p">היכנסו ל-<a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> והתחברו (אפשר עם Google).</p></div></div>
+          <div class="tutorial-step"><div class="step-number">2</div><div class="step-content"><strong data-i18n="ivritS2t">פורסים את ivrit.ai</strong><p data-i18n="ivritS2p">צרו endpoint חדש עם ה-image של <code>ivrit-ai/runpod-serverless</code>.</p></div></div>
+          <div class="tutorial-step"><div class="step-number">3</div><div class="step-content"><strong data-i18n="ivritS3t">מעתיקים את ה-API Key</strong><p data-i18n="ivritS3p">בתפריט <strong>Settings → API Keys</strong> צרו מפתח חדש והדביקו אותו בשדה הראשון למטה.</p></div></div>
+          <div class="tutorial-step"><div class="step-number">4</div><div class="step-content"><strong data-i18n="ivritS4t">מעתיקים את ה-Endpoint ID</strong><p data-i18n="ivritS4p">לחצו על ה-endpoint שיצרתם והעתיקו את ה-<strong>Endpoint ID</strong> לשדה השני.</p></div></div>
+        </div>
+        <div class="api-input-group">
+          <label><span class="cfg-dot" id="dot-IVRIT_API_KEY"></span> <span data-i18n="labelIvritKey">ivrit.ai — API Key (RunPod)</span></label>
+          <div class="api-input-row">
+            <input type="password" class="api-input" id="cfg-IVRIT_API_KEY" data-i18n-ph="apiPh" placeholder="הדביקו כאן את הערך..." />
+            <button class="eye-btn" onclick="toggleEye('cfg-IVRIT_API_KEY')">👁️</button>
+          </div>
+        </div>
+        <div class="api-input-group">
+          <label><span class="cfg-dot" id="dot-IVRIT_ENDPOINT_ID"></span> <span data-i18n="labelIvritEp">ivrit.ai — Endpoint ID</span></label>
+          <div class="api-input-row">
+            <input type="password" class="api-input" id="cfg-IVRIT_ENDPOINT_ID" data-i18n-ph="apiPh" placeholder="הדביקו כאן את הערך..." />
+            <button class="eye-btn" onclick="toggleEye('cfg-IVRIT_ENDPOINT_ID')">👁️</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RapidAPI -->
+      <div class="settings-group">
+        <div class="settings-title" data-i18n="setRapidTitle">🔑 הורדת יוטיוב (RapidAPI) — אופציונלי</div>
+        <div class="tutorial-box">
+          <h3 data-i18n="rapidTutTitle">📖 איך משיגים מפתח RapidAPI חינמי</h3>
+          <div class="tutorial-step"><div class="step-number">1</div><div class="step-content"><strong data-i18n="rapidS1t">פותחים את עמוד ה-API</strong><p data-i18n="rapidS1p">היכנסו ל-<a href="https://rapidapi.com/ytjar/api/youtube-mp36" target="_blank" rel="noopener">YouTube MP3 (ytjar) ב-RapidAPI</a>.</p></div></div>
+          <div class="tutorial-step"><div class="step-number">2</div><div class="step-content"><strong data-i18n="rapidS2t">נרשמים / מתחברים</strong><p data-i18n="rapidS2p">צרו חשבון חינמי (גם עם Google) או התחברו.</p></div></div>
+          <div class="tutorial-step"><div class="step-number">3</div><div class="step-content"><strong data-i18n="rapidS3t">נרשמים לחבילה החינמית</strong><p data-i18n="rapidS3p">לחצו על <strong>Subscribe to Test</strong> ובחרו את חבילת <code>BASIC</code> החינמית (ללא כרטיס אשראי).</p></div></div>
+          <div class="tutorial-step"><div class="step-number">4</div><div class="step-content"><strong data-i18n="rapidS4t">מעתיקים את המפתח</strong><p data-i18n="rapidS4p">בלשונית <strong>Endpoints</strong>, תחת <strong>Header Parameters</strong>, העתיקו את הערך של <code>X-RapidAPI-Key</code>.</p></div></div>
+        </div>
+        <div class="api-input-group">
+          <label><span class="cfg-dot" id="dot-RAPIDAPI_KEY"></span> <span data-i18n="labelRapid">RapidAPI — X-RapidAPI-Key</span></label>
+          <div class="api-input-row">
+            <input type="password" class="api-input" id="cfg-RAPIDAPI_KEY" data-i18n-ph="apiPh" placeholder="הדביקו כאן את הערך..." />
+            <button class="eye-btn" onclick="toggleEye('cfg-RAPIDAPI_KEY')">👁️</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- App settings -->
+      <div class="settings-group">
+        <div class="settings-title" data-i18n="setAppTitle">🎛️ הגדרות אפליקציה</div>
+        <div class="setting-item">
+          <div><div class="setting-label" data-i18n="setLangLabel">שפה</div><div class="setting-desc" data-i18n="setLangDesc">שפת הממשק</div></div>
+          <div class="seg">
+            <button class="seg-btn" data-lang="he" onclick="setLang('he')">עברית</button>
+            <button class="seg-btn" data-lang="en" onclick="setLang('en')">English</button>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div><div class="setting-label" data-i18n="setSaveHistLabel">שמירת היסטוריה</div><div class="setting-desc" data-i18n="setSaveHistDesc">לזכור את התמלולים הקודמים</div></div>
+          <label class="toggle-switch"><input type="checkbox" id="set-save-history" checked><span class="slider"></span></label>
+        </div>
+        <div class="setting-item">
+          <div><div class="setting-label" data-i18n="setNotifLabel">התראות</div><div class="setting-desc" data-i18n="setNotifDesc">הודעות על הצלחה / שגיאה</div></div>
+          <label class="toggle-switch"><input type="checkbox" id="set-notifications" checked><span class="slider"></span></label>
+        </div>
+        <div class="setting-item">
+          <div><div class="setting-label" data-i18n="setDarkLabel">מצב כהה</div><div class="setting-desc" data-i18n="setDarkDesc">החלפה בין ערכת נושא בהירה לכהה</div></div>
+          <label class="toggle-switch"><input type="checkbox" id="set-dark-mode" onchange="syncThemeFromToggle()"><span class="slider"></span></label>
+        </div>
+        <button class="save-btn" onclick="saveSettings()" data-i18n="btnSaveSettings">💾 שמור הגדרות</button>
+      </div>
+
+      <!-- About -->
+      <div class="settings-group">
+        <div class="settings-title" data-i18n="aboutTitle">ℹ️ אודות</div>
+        <div class="about-grid">
+          <div class="about-item"><div class="label" data-i18n="aboutVersion">גרסה</div><div class="value">2.0.0</div></div>
+          <div class="about-item"><div class="label" data-i18n="aboutEngine">מנוע תמלול</div><div class="value">ivrit.ai · Whisper</div></div>
+          <div class="about-item"><div class="label" data-i18n="aboutYt">הורדת יוטיוב</div><div class="value">YouTube MP3 (RapidAPI)</div></div>
+          <div class="about-item"><div class="label" data-i18n="aboutFeatures">יכולות</div><div class="value" data-i18n="aboutFeaturesVal">הקלטה · קובץ · יוטיוב · היסטוריה</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <span data-i18n="footerMade">נבנה באהבה על ידי <strong>ידידיה</strong></span> <span class="badge">v2.0</span><br>
+    <small data-i18n="footerSub">מבוסס על מנוע התמלול העברי <strong>ivrit.ai</strong></small>
+  </div>
+</div>
+
+<!-- ═══ Transcript viewer modal ═══ -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="t" id="modal-title">תמלול</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="modal-foot-btn" onclick="downloadModal()" data-i18n="btnDownloadTxt">⬇️ הורד טקסט</button>
+      <button class="modal-foot-btn primary" onclick="copyModal()" data-i18n="btnCopy">📋 העתק</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ── State ────────────────────────────────────────────────────────────────────
+/* ═══════════════ Translations ═══════════════ */
+const T = {
+  he: {
+    title: 'תמלול שיעורי תורה', h1: 'תמלול שיעורים',
+    subtitle: 'תמלול מהיר ופשוט · הקלטה, קובץ או יוטיוב',
+    titleTheme: 'מצב כהה / בהיר', titleHistory: 'היסטוריה', titleSettings: 'הגדרות',
+    tabTranscribe: '🎙️ תמלול', tabYoutube: '🔗 הורדה מיוטיוב', tabHistory: '📜 היסטוריה', tabSettings: '⚙️ הגדרות',
+    infoTranscribe: 'בחרו דרך: <strong>הקלטה</strong> ישירות מהמיקרופון או <strong>העלאת קובץ</strong> שמע/וידאו — ולחצו <strong>תמלל</strong>. התמלול נשמר אוטומטית בהיסטוריה.',
+    methodRecordTitle: 'הקלטה', methodRecordSub: 'הקליטו מהמיקרופון',
+    methodUploadTitle: 'העלאת קובץ', methodUploadSub: 'MP3, M4A, WAV, MP4…',
+    recIdle: 'לחצו כדי להתחיל להקליט', recRecording: 'מקליט... לחצו לעצירה', recReady: 'ההקלטה מוכנה — לחצו "תמלל"',
+    dropTitle: 'גררו קובץ לכאן או לחצו לבחירה', dropSub: 'קבצי שמע ווידאו עד כ-100MB',
+    btnTranscribe: '✨ תמלל', badgeTranscript: '✅ התמלול מוכן',
+    btnCopy: '📋 העתק', btnDownloadTxt: '⬇️ הורד טקסט',
+    futureNote: '✨ בקרוב: שכתוב, הגהה וסיכום אוטומטי עם Claude — ישירות מכאן.',
+    infoYoutube: 'הדביקו קישור YouTube כדי <strong>להוריד את האודיו</strong> למחשב.',
+    ytPlaceholder: 'https://youtube.com/watch?v=...  או  youtu.be/...',
+    btnPaste: '📋 הדבק', btnConvert: '🚀 המר והורד', badgeConvert: '✅ ההמרה הושלמה',
+    btnDownloadAudio: '⬇️ הורד אודיו',
+    ytHint: '💡 להורדה בלבד. כדי לתמלל — הורידו את הקובץ וגררו אותו ללשונית "תמלול".',
+    historyTitle: '📜 היסטוריית תמלולים', searchPh: 'חיפוש בהיסטוריה...',
+    clearHistory: '🗑️ נקה את כל ההיסטוריה',
+    statTranscriptions: 'תמלולים', statDownloads: 'הורדות מיוטיוב', statRecordings: 'הקלטות',
+    setIvritTitle: '🗝️ הגדרת התמלול (ivrit.ai)', ivritTutTitle: '📖 איך משיגים את המפתחות של ivrit.ai',
+    ivritS1t: 'נכנסים ל-RunPod', ivritS1p: 'היכנסו ל-<a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> והתחברו (אפשר עם Google).',
+    ivritS2t: 'פורסים את ivrit.ai', ivritS2p: 'צרו endpoint חדש עם ה-image של <code>ivrit-ai/runpod-serverless</code>.',
+    ivritS3t: 'מעתיקים את ה-API Key', ivritS3p: 'בתפריט <strong>Settings → API Keys</strong> צרו מפתח חדש והדביקו אותו בשדה הראשון למטה.',
+    ivritS4t: 'מעתיקים את ה-Endpoint ID', ivritS4p: 'לחצו על ה-endpoint שיצרתם והעתיקו את ה-<strong>Endpoint ID</strong> לשדה השני.',
+    labelIvritKey: 'ivrit.ai — API Key (RunPod)', labelIvritEp: 'ivrit.ai — Endpoint ID',
+    setRapidTitle: '🔑 הורדת יוטיוב (RapidAPI) — אופציונלי', rapidTutTitle: '📖 איך משיגים מפתח RapidAPI חינמי',
+    rapidS1t: 'פותחים את עמוד ה-API', rapidS1p: 'היכנסו ל-<a href="https://rapidapi.com/ytjar/api/youtube-mp36" target="_blank" rel="noopener">YouTube MP3 (ytjar) ב-RapidAPI</a>.',
+    rapidS2t: 'נרשמים / מתחברים', rapidS2p: 'צרו חשבון חינמי (גם עם Google) או התחברו.',
+    rapidS3t: 'נרשמים לחבילה החינמית', rapidS3p: 'לחצו על <strong>Subscribe to Test</strong> ובחרו את חבילת <code>BASIC</code> החינמית (ללא כרטיס אשראי).',
+    rapidS4t: 'מעתיקים את המפתח', rapidS4p: 'בלשונית <strong>Endpoints</strong>, תחת <strong>Header Parameters</strong>, העתיקו את הערך של <code>X-RapidAPI-Key</code>.',
+    labelRapid: 'RapidAPI — X-RapidAPI-Key', apiPh: 'הדביקו כאן את הערך...',
+    setAppTitle: '🎛️ הגדרות אפליקציה',
+    setLangLabel: 'שפה', setLangDesc: 'שפת הממשק',
+    setSaveHistLabel: 'שמירת היסטוריה', setSaveHistDesc: 'לזכור את התמלולים הקודמים',
+    setNotifLabel: 'התראות', setNotifDesc: 'הודעות על הצלחה / שגיאה',
+    setDarkLabel: 'מצב כהה', setDarkDesc: 'החלפה בין ערכת נושא בהירה לכהה',
+    btnSaveSettings: '💾 שמור הגדרות', aboutTitle: 'ℹ️ אודות',
+    aboutVersion: 'גרסה', aboutEngine: 'מנוע תמלול', aboutYt: 'הורדת יוטיוב', aboutFeatures: 'יכולות',
+    aboutFeaturesVal: 'הקלטה · קובץ · יוטיוב · היסטוריה',
+    footerMade: 'נבנה באהבה על ידי <strong>ידידיה</strong>', footerSub: 'מבוסס על מנוע התמלול העברי <strong>ivrit.ai</strong>',
+    bannerText: 'כדי לתמלל צריך להגדיר את מפתחות ivrit.ai.', bannerRapid: 'כדי להוריד מיוטיוב צריך מפתח RapidAPI.', bannerBtn: 'פתחו הגדרות',
+    /* dynamic */
+    micDenied: 'אין גישה למיקרופון', recordFirst: 'הקליטו תחילה', chooseFile: 'בחרו קובץ',
+    pasteUrlMsg: 'הדביקו קישור', copied: 'הועתק ללוח', downloadStarted: 'ההורדה החלה',
+    transcribeDone: 'התמלול הושלם ✅', convertDone: 'ההמרה הושלמה ✅', settingsSaved: 'ההגדרות נשמרו ✅',
+    historyCleared: 'ההיסטוריה נמחקה', clipboardDenied: 'אין גישה ללוח — הדביקו ידנית (Ctrl+V)',
+    statusUploading: 'מעלה לשרת התמלול...', statusQueue: 'ממתין בתור...', statusProcessing: 'מתמלל...',
+    statusConverting: 'ממיר לאודיו...', statusConnecting: 'מתחבר ל-YouTube...',
+    words: 'מילים', chars: 'תווים', noResults: 'לא נמצאו תוצאות',
+    emptyTitle: 'עדיין אין תמלולים', emptySub: 'התמלולים שלכם יופיעו כאן',
+    invalidUrl: 'קישור YouTube לא תקין', timeoutMsg: 'תם הזמן הקצוב להמרה', txFailed: 'התמלול נכשל',
+    missingIvrit: 'חסרים מפתחות ivrit.ai — עברו להגדרות', missingRapid: 'חסר מפתח RapidAPI — עברו להגדרות',
+    confirmClear: 'למחוק את כל ההיסטוריה והסטטיסטיקה?', srcRecord: 'הקלטה', srcUpload: 'קובץ', srcLink: 'יוטיוב',
+  },
+  en: {
+    title: 'Torah Lecture Transcription', h1: 'Lecture Transcription',
+    subtitle: 'Fast, simple transcription · record, file or YouTube',
+    titleTheme: 'Dark / light mode', titleHistory: 'History', titleSettings: 'Settings',
+    tabTranscribe: '🎙️ Transcribe', tabYoutube: '🔗 YouTube Download', tabHistory: '📜 History', tabSettings: '⚙️ Settings',
+    infoTranscribe: 'Choose a method: <strong>record</strong> straight from your microphone or <strong>upload</strong> an audio/video file — then hit <strong>Transcribe</strong>. The result is saved to history automatically.',
+    methodRecordTitle: 'Record', methodRecordSub: 'From your microphone',
+    methodUploadTitle: 'Upload file', methodUploadSub: 'MP3, M4A, WAV, MP4…',
+    recIdle: 'Tap to start recording', recRecording: 'Recording... tap to stop', recReady: 'Recording ready — tap "Transcribe"',
+    dropTitle: 'Drag a file here or click to choose', dropSub: 'Audio & video files up to ~100MB',
+    btnTranscribe: '✨ Transcribe', badgeTranscript: '✅ Transcript ready',
+    btnCopy: '📋 Copy', btnDownloadTxt: '⬇️ Download text',
+    futureNote: '✨ Coming soon: AI rewrite, proofreading & summary with Claude — right here.',
+    infoYoutube: 'Paste a YouTube link to <strong>download the audio</strong> to your computer.',
+    ytPlaceholder: 'https://youtube.com/watch?v=...  or  youtu.be/...',
+    btnPaste: '📋 Paste', btnConvert: '🚀 Convert & download', badgeConvert: '✅ Conversion complete',
+    btnDownloadAudio: '⬇️ Download audio',
+    ytHint: '💡 Download only. To transcribe — download the file and drop it into the "Transcribe" tab.',
+    historyTitle: '📜 Transcription history', searchPh: 'Search history...',
+    clearHistory: '🗑️ Clear all history',
+    statTranscriptions: 'Transcriptions', statDownloads: 'YouTube downloads', statRecordings: 'Recordings',
+    setIvritTitle: '🗝️ Transcription setup (ivrit.ai)', ivritTutTitle: '📖 How to get your ivrit.ai keys',
+    ivritS1t: 'Open RunPod', ivritS1p: 'Go to <a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> and sign in (Google works too).',
+    ivritS2t: 'Deploy ivrit.ai', ivritS2p: 'Create a new endpoint using the <code>ivrit-ai/runpod-serverless</code> image.',
+    ivritS3t: 'Copy the API Key', ivritS3p: 'Under <strong>Settings → API Keys</strong>, create a key and paste it into the first field below.',
+    ivritS4t: 'Copy the Endpoint ID', ivritS4p: 'Click the endpoint you created and copy its <strong>Endpoint ID</strong> into the second field.',
+    labelIvritKey: 'ivrit.ai — API Key (RunPod)', labelIvritEp: 'ivrit.ai — Endpoint ID',
+    setRapidTitle: '🔑 YouTube download (RapidAPI) — optional', rapidTutTitle: '📖 How to get a free RapidAPI key',
+    rapidS1t: 'Open the API page', rapidS1p: 'Go to <a href="https://rapidapi.com/ytjar/api/youtube-mp36" target="_blank" rel="noopener">YouTube MP3 (ytjar) on RapidAPI</a>.',
+    rapidS2t: 'Sign up / log in', rapidS2p: 'Create a free account (Google works too) or log in.',
+    rapidS3t: 'Subscribe to the free plan', rapidS3p: 'Click <strong>Subscribe to Test</strong> and pick the free <code>BASIC</code> plan (no credit card).',
+    rapidS4t: 'Copy the key', rapidS4p: 'On the <strong>Endpoints</strong> tab, under <strong>Header Parameters</strong>, copy the <code>X-RapidAPI-Key</code> value.',
+    labelRapid: 'RapidAPI — X-RapidAPI-Key', apiPh: 'Paste the value here...',
+    setAppTitle: '🎛️ App settings',
+    setLangLabel: 'Language', setLangDesc: 'Interface language',
+    setSaveHistLabel: 'Save history', setSaveHistDesc: 'Remember your past transcriptions',
+    setNotifLabel: 'Notifications', setNotifDesc: 'Toast alerts on success / failure',
+    setDarkLabel: 'Dark mode', setDarkDesc: 'Switch between light and dark theme',
+    btnSaveSettings: '💾 Save settings', aboutTitle: 'ℹ️ About',
+    aboutVersion: 'Version', aboutEngine: 'Transcription engine', aboutYt: 'YouTube download', aboutFeatures: 'Capabilities',
+    aboutFeaturesVal: 'Record · file · YouTube · history',
+    footerMade: 'Made with ❤️ by <strong>Yedidya</strong>', footerSub: 'Powered by the <strong>ivrit.ai</strong> Hebrew transcription engine',
+    bannerText: 'To transcribe, set your ivrit.ai keys.', bannerRapid: 'To download from YouTube, set your RapidAPI key.', bannerBtn: 'Open settings',
+    micDenied: 'Microphone access denied', recordFirst: 'Record first', chooseFile: 'Choose a file',
+    pasteUrlMsg: 'Paste a link', copied: 'Copied to clipboard', downloadStarted: 'Download started',
+    transcribeDone: 'Transcription complete ✅', convertDone: 'Conversion complete ✅', settingsSaved: 'Settings saved ✅',
+    historyCleared: 'History cleared', clipboardDenied: 'Clipboard blocked — paste manually (Ctrl+V)',
+    statusUploading: 'Uploading to transcription server...', statusQueue: 'Waiting in queue...', statusProcessing: 'Transcribing...',
+    statusConverting: 'Converting audio...', statusConnecting: 'Connecting to YouTube...',
+    words: 'words', chars: 'characters', noResults: 'No results found',
+    emptyTitle: 'No transcriptions yet', emptySub: 'Your transcriptions will appear here',
+    invalidUrl: 'Invalid YouTube URL', timeoutMsg: 'Conversion timed out', txFailed: 'Transcription failed',
+    missingIvrit: 'Missing ivrit.ai keys — go to Settings', missingRapid: 'Missing RapidAPI key — go to Settings',
+    confirmClear: 'Clear all history and stats?', srcRecord: 'Record', srcUpload: 'File', srcLink: 'YouTube',
+  },
+};
+function t(k) { return (T[state.settings.lang] && T[state.settings.lang][k]) || T.he[k] || k; }
+
+/* ═══════════════ State & storage ═══════════════ */
+const CKEY = 'torah-tx-config', HKEY = 'torah-tx-history', SKEY = 'torah-tx-settings', STKEY = 'torah-tx-stats';
+const CONFIG_KEYS = ['IVRIT_API_KEY', 'IVRIT_ENDPOINT_ID', 'RAPIDAPI_KEY'];
 const state = {
-  currentJob: null,   // { jobId, steps:{}, results:{}, youtubeUrl }
-  eventSource: null,
-  history: [],
-  activeView: 'process',
-  activeModal: null,  // { step, tab }
-  timers: {},         // step -> { startTime, intervalId } | null
+  method: 'record', tab: 'transcribe',
+  audioBase64: null, fileName: null, source: null,
+  recording: false, lastTranscript: '', modalText: '', ytData: null, history: [],
+  settings: { lang: 'he', saveHistory: true, notifications: true, darkMode: false },
+  stats: { transcriptions: 0, downloads: 0, recordings: 0 },
+  busy: false,
+};
+let mediaRecorder = null, recChunks = [], recStart = 0, recTimerId = null, loadTimerId = null;
+
+function getCfg() { try { return JSON.parse(localStorage.getItem(CKEY) || '{}'); } catch { return {}; } }
+function setCfg(o) { localStorage.setItem(CKEY, JSON.stringify(o)); }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ═══════════════ Init ═══════════════ */
+window.onload = () => {
+  loadSettings();
+  loadStats(); updateStats();
+  loadHistory(); renderHistory();
+  setupDropzone();
+  document.getElementById('file-input').addEventListener('change', e => handleFile(e.target.files[0]));
+  document.getElementById('yt-url').addEventListener('keypress', e => { if (e.key === 'Enter') convertYoutube(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  refreshConfigDots();
+  checkBanners();
 };
 
-// ── Init ─────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
-  loadHistory();
-  document.getElementById('youtube-url').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') startPipeline();
-  });
-});
-
-// ── View switching ────────────────────────────────────────────────────────────
-function switchView(view) {
-  state.activeView = view;
-  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
-  document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
-  document.getElementById('view-' + view).classList.add('active');
-  document.getElementById('nav-' + view).classList.add('active');
-  if (view === 'history') renderHistory();
-}
-
-// ── Pipeline start ────────────────────────────────────────────────────────────
-async function startPipeline() {
-  var url = document.getElementById('youtube-url').value.trim();
-  if (!url) { showToast('נא להזין כתובת YouTube'); return; }
-
-  resetUI();
-
-  try {
-    var res = await fetch('/api/process', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ youtubeUrl: url }),
-    });
-    var data = await res.json();
-    if (!data.jobId) throw new Error(data.error || 'שגיאה בהתחלת עיבוד');
-
-    state.currentJob = { jobId: data.jobId, steps: {}, results: {}, youtubeUrl: url };
-    setStartBtnLoading(true);
-    openSSE(data.jobId);
-  } catch (err) {
-    showToast('שגיאה: ' + err.message);
-    setStartBtnLoading(false);
-  }
-}
-
-// ── Resume from step ──────────────────────────────────────────────────────────
-async function resumeFromStep(fromStep, extraData) {
-  resetUI();
-  setStartBtnLoading(true);
-  switchView('process');
-
-  try {
-    var body = Object.assign({ fromStep: fromStep }, extraData);
-    var res = await fetch('/api/resume', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    var data = await res.json();
-    if (!data.jobId) throw new Error(data.error || 'שגיאה בהמשך עיבוד');
-
-    state.currentJob = Object.assign({ jobId: data.jobId, steps: {}, results: {} }, extraData);
-    openSSE(data.jobId);
-  } catch (err) {
-    showToast('שגיאה: ' + err.message);
-    setStartBtnLoading(false);
-  }
-}
-
-// ── SSE ───────────────────────────────────────────────────────────────────────
-function openSSE(jobId) {
-  if (state.eventSource) state.eventSource.close();
-  var es = new EventSource('/api/progress/' + jobId);
-  state.eventSource = es;
-
-  es.onmessage = function(event) {
-    try {
-      var data = JSON.parse(event.data);
-      handleSSEMessage(data);
-    } catch (e) {}
-  };
-
-  es.onerror = function() {
-    es.close();
-    state.eventSource = null;
-    setStartBtnLoading(false);
-  };
-}
-
-function handleSSEMessage(data) {
-  if (data.type === 'step') {
-    updateStep(data.step, data.status, data.message);
-  } else if (data.type === 'result') {
-    if (state.currentJob) {
-      state.currentJob.results['step' + data.step] = data.data;
-    }
-    renderStepOutput(data.step, data.data);
-    showToggleBtn(data.step);
-  } else if (data.type === 'done') {
-    setStartBtnLoading(false);
-    if (state.eventSource) { state.eventSource.close(); state.eventSource = null; }
-    if (state.currentJob) {
-      var r = state.currentJob.results;
-      var videoId = (r.step1 && r.step1.videoId) || extractVideoId(state.currentJob.youtubeUrl);
-      var record = {
-        id: state.currentJob.jobId,
-        timestamp: Date.now(),
-        videoId: videoId,
-        videoTitle: 'שיעור תורה — ' + new Date().toLocaleDateString('he-IL'),
-        mp3Url: (r.step1 && r.step1.mp3Url) || null,
-        transcription: (r.step2 && r.step2.transcription) || null,
-        parts: (r.step3 && r.step3.parts) || null,
-        combined: (r.step4 && r.step4.combined) || null,
-        filename: data.filename,
-        status: 'done',
-      };
-      saveToHistory(record);
-    }
-  } else if (data.type === 'error') {
-    setStartBtnLoading(false);
-    if (state.eventSource) { state.eventSource.close(); state.eventSource = null; }
-    showToast('שגיאה: ' + data.message);
-  }
-}
-
-// ── Update step UI ────────────────────────────────────────────────────────────
-function updateStep(n, status, message) {
-  var card = document.getElementById('step-card-' + n);
-  var statusEl = document.getElementById('step-status-' + n);
-  if (!card || !statusEl) return;
-
-  card.className = 'step-card ' + status;
-  statusEl.textContent = message || '';
-
-  if (status === 'active') {
-    startStepTimer(n);
-    var nameEl = card.querySelector('.step-name');
-    if (nameEl && !nameEl.querySelector('.spinner')) {
-      var sp = document.createElement('span');
-      sp.className = 'spinner';
-      nameEl.appendChild(sp);
-    }
-  } else if (status === 'done' || status === 'error') {
-    stopStepTimer(n);
-    var spinner = card.querySelector('.spinner');
-    if (spinner) spinner.remove();
-    var dot = document.getElementById('step-dot-' + n);
-    if (dot) dot.textContent = status === 'done' ? '✓' : '✕';
-  }
-}
-
-// ── Timers ────────────────────────────────────────────────────────────────────
-function startStepTimer(n) {
-  if (state.timers[n]) clearInterval(state.timers[n].intervalId);
-  var startTime = Date.now();
-  var el = document.getElementById('step-elapsed-' + n);
-  var intervalId = setInterval(function() {
-    if (el) el.textContent = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
-  }, 100);
-  state.timers[n] = { startTime: startTime, intervalId: intervalId };
-}
-
-function stopStepTimer(n) {
-  if (state.timers[n]) {
-    clearInterval(state.timers[n].intervalId);
-    var el = document.getElementById('step-elapsed-' + n);
-    if (el && state.timers[n].startTime) {
-      el.textContent = ((Date.now() - state.timers[n].startTime) / 1000).toFixed(1) + 's';
-    }
-    state.timers[n] = null;
-  }
-}
-
-// ── Toggle output panel ───────────────────────────────────────────────────────
-function showToggleBtn(n) {
-  var btn = document.getElementById('toggle-' + n);
-  if (btn) btn.style.display = '';
-}
-
-function toggleOutput(n) {
-  var panel = document.getElementById('step-output-' + n);
-  var btn = document.getElementById('toggle-' + n);
-  if (!panel) return;
-  var isOpen = panel.classList.contains('open');
-  panel.classList.toggle('open', !isOpen);
-  if (btn) btn.textContent = isOpen ? 'הצג ▾' : 'הסתר ▴';
-}
-
-// ── Render step output ────────────────────────────────────────────────────────
-function renderStepOutput(n, data) {
-  if (n === 1) {
-    var player = document.getElementById('audio-player-1');
-    var dlBtn = document.getElementById('mp3-download-btn');
-    if (player && data.mp3Url) {
-      player.src = data.mp3Url;
-      player.style.display = '';
-    }
-    if (dlBtn) dlBtn.style.display = '';
-  }
-
-  if (n === 2) {
-    var el = document.getElementById('transcription-text');
-    if (el && data.transcription) el.textContent = data.transcription;
-  }
-
-  if (n === 3) {
-    var before = document.getElementById('compare-before-3');
-    var after = document.getElementById('compare-after-3');
-    if (before && data.original) before.textContent = data.original;
-    if (after && data.parts) after.textContent = data.parts.join('\n\n---\n\n');
-  }
-
-  if (n === 4) {
-    var el4 = document.getElementById('combined-text');
-    if (el4 && data.combined) el4.textContent = data.combined;
-
-    var partsContainer = document.getElementById('gpt-parts-container');
-    if (partsContainer && Array.isArray(data.parts) && data.parts.length > 0) {
-      var html = '';
-      if (data.parts.length > 1) {
-        html += '<div class="gpt-parts-label">חלקים בנפרד (' + data.parts.length + ')</div>';
-      }
-      data.parts.forEach(function(part, i) {
-        var preview = part.replace(/\n/g, ' ').slice(0, 60);
-        html += '<div class="gpt-part-section">' +
-          '<div class="gpt-part-header" onclick="toggleGptPart(this)">' +
-          '<span>&#9654; חלק ' + (i + 1) + '</span>' +
-          '<span style="font-size:0.8rem;opacity:0.7">' + preview + '...</span>' +
-          '</div>' +
-          '<div class="gpt-part-body"></div>' +
-          '</div>';
-      });
-      partsContainer.innerHTML = html;
-      // Set textContent for each part body (avoids XSS, preserves whitespace)
-      var bodies = partsContainer.querySelectorAll('.gpt-part-body');
-      data.parts.forEach(function(part, i) { bodies[i].textContent = part; });
-    } else if (partsContainer) {
-      partsContainer.innerHTML = '';
-    }
-  }
-
-  if (n === 5) {
-    var area = document.getElementById('download-area-5');
-    if (area && data.filename) {
-      area.innerHTML =
-        '<div style="color:var(--success);font-size:0.9rem;margin-bottom:8px">&#10003; הקובץ מוכן להורדה</div>' +
-        '<button class="download-big-btn" onclick="downloadFile(\'' + data.filename + '\')">' +
-        '<span>&#128196;</span><span>הורד קובץ Word</span></button>';
-      showToast('קובץ Word מוכן!');
-    }
-  }
-}
-
-// ── GPT part toggle ───────────────────────────────────────────────────────────
-function toggleGptPart(header) {
-  var body = header.nextElementSibling;
-  var arrow = header.querySelector('span:first-child');
-  if (body.classList.contains('open')) {
-    body.classList.remove('open');
-    if (arrow) arrow.textContent = '► חלק ' + (Array.from(header.parentElement.parentElement.children).indexOf(header.parentElement) + 1);
-  } else {
-    body.classList.add('open');
-    if (arrow) arrow.textContent = '▼ חלק ' + (Array.from(header.parentElement.parentElement.children).indexOf(header.parentElement) + 1);
-  }
-}
-
-// ── Download ──────────────────────────────────────────────────────────────────
-function downloadFile(filename) {
-  window.open('/api/download/' + filename, '_blank');
-}
-
-function downloadMp3() {
-  var r = state.currentJob && state.currentJob.results && state.currentJob.results.step1;
-  if (r && r.mp3Url) window.open(r.mp3Url, '_blank');
-}
-
-// ── Copy ──────────────────────────────────────────────────────────────────────
-function copyText(key) {
-  var text = '';
-  if (key === 'transcription') {
-    text = (state.currentJob && state.currentJob.results && state.currentJob.results.step2 && state.currentJob.results.step2.transcription) || '';
-  } else if (key === 'combined') {
-    text = (state.currentJob && state.currentJob.results && state.currentJob.results.step4 && state.currentJob.results.step4.combined) || '';
-  }
-  if (!text) { showToast('אין טקסט להעתקה'); return; }
-  navigator.clipboard.writeText(text).then(function() { showToast('הועתק ללוח'); });
-}
-
-// ── Modal ─────────────────────────────────────────────────────────────────────
-function openModal(step) {
-  var overlay = document.getElementById('modal-overlay');
-  var titleEl = document.getElementById('modal-title');
-  var tabsEl = document.getElementById('modal-tabs');
-  var textEl = document.getElementById('modal-text');
-  var results = state.currentJob && state.currentJob.results;
-
-  state.activeModal = { step: step, tab: 'after' };
-
-  if (step === 2) {
-    titleEl.textContent = 'תמלול';
-    tabsEl.style.display = 'none';
-    textEl.textContent = (results && results.step2 && results.step2.transcription) || '';
-  } else if (step === 3) {
-    titleEl.textContent = 'הגהה וחלוקה — השוואה';
-    tabsEl.style.display = '';
-    document.getElementById('modal-tab-before').textContent = 'לפני';
-    document.getElementById('modal-tab-after').textContent = 'אחרי';
-    switchModalTab('before');
-  } else if (step === 4) {
-    titleEl.textContent = 'שכתוב סופי';
-    tabsEl.style.display = 'none';
-    textEl.textContent = (results && results.step4 && results.step4.combined) || '';
-  }
-
-  overlay.classList.add('open');
-}
-
-function switchModalTab(tab) {
-  state.activeModal = Object.assign({}, state.activeModal, { tab: tab });
-  var textEl = document.getElementById('modal-text');
-  var results = state.currentJob && state.currentJob.results;
-
-  document.querySelectorAll('.modal-tab').forEach(function(t) { t.classList.remove('active'); });
-
-  if (tab === 'before') {
-    document.getElementById('modal-tab-before').classList.add('active');
-    if (state.activeModal.step === 3) {
-      textEl.textContent = (results && results.step3 && results.step3.original) || '';
-    }
-  } else {
-    document.getElementById('modal-tab-after').classList.add('active');
-    if (state.activeModal.step === 3) {
-      var parts = (results && results.step3 && results.step3.parts) || [];
-      textEl.textContent = parts.join('\n\n---\n\n');
-    }
-  }
-}
-
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  state.activeModal = null;
-}
-
-function handleModalOverlayClick(e) {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
-}
-
-function copyModalText() {
-  var text = document.getElementById('modal-text').textContent;
-  navigator.clipboard.writeText(text).then(function() { showToast('הועתק ללוח'); });
-}
-
-function downloadModalText() {
-  var text = document.getElementById('modal-text').textContent;
-  if (!text) return;
-  var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'torah_text_' + Date.now() + '.txt';
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('הורדה החלה');
-}
-
-// ── Reset UI ──────────────────────────────────────────────────────────────────
-function resetUI() {
-  // Clear timers
-  Object.keys(state.timers).forEach(function(n) {
-    if (state.timers[n]) clearInterval(state.timers[n].intervalId);
-  });
-  state.timers = {};
-
-  for (var n = 1; n <= 5; n++) {
-    var card = document.getElementById('step-card-' + n);
-    if (card) card.className = 'step-card waiting';
-
-    var statusEl = document.getElementById('step-status-' + n);
-    if (statusEl) statusEl.textContent = 'ממתין...';
-
-    var elapsedEl = document.getElementById('step-elapsed-' + n);
-    if (elapsedEl) elapsedEl.textContent = '';
-
-    var dotEl = document.getElementById('step-dot-' + n);
-    if (dotEl) dotEl.textContent = '';
-
-    var toggleBtn = document.getElementById('toggle-' + n);
-    if (toggleBtn) { toggleBtn.style.display = 'none'; toggleBtn.textContent = 'הצג ▾'; }
-
-    var outputPanel = document.getElementById('step-output-' + n);
-    if (outputPanel) outputPanel.classList.remove('open');
-
-    if (card) { var spinner = card.querySelector('.spinner'); if (spinner) spinner.remove(); }
-  }
-
-  var transcEl = document.getElementById('transcription-text');
-  if (transcEl) transcEl.textContent = '';
-  var before3 = document.getElementById('compare-before-3');
-  if (before3) before3.textContent = '';
-  var after3 = document.getElementById('compare-after-3');
-  if (after3) after3.textContent = '';
-  var combined4 = document.getElementById('combined-text');
-  if (combined4) combined4.textContent = '';
-  var gptParts = document.getElementById('gpt-parts-container');
-  if (gptParts) gptParts.innerHTML = '';
-  var dlArea5 = document.getElementById('download-area-5');
-  if (dlArea5) dlArea5.innerHTML = '<div style="color:var(--text-muted);font-size:0.9rem">הקובץ יהיה זמין כאן לאחר סיום העיבוד</div>';
-
-  var audioPlayer = document.getElementById('audio-player-1');
-  if (audioPlayer) { audioPlayer.src = ''; audioPlayer.style.display = 'none'; }
-  var mp3Btn = document.getElementById('mp3-download-btn');
-  if (mp3Btn) mp3Btn.style.display = 'none';
-
-  state.currentJob = null;
-  if (state.eventSource) { state.eventSource.close(); state.eventSource = null; }
-}
-
-function setStartBtnLoading(loading) {
-  var btn = document.getElementById('start-btn');
-  var icon = document.getElementById('start-icon');
-  var label = document.getElementById('start-label');
-  if (!btn) return;
-  btn.disabled = loading;
-  if (loading) {
-    icon.className = 'spinner';
-    icon.textContent = '';
-    label.textContent = 'מעבד...';
-  } else {
-    icon.className = '';
-    icon.textContent = '▶';
-    label.textContent = 'התחל';
-  }
-}
-
-// ── History ───────────────────────────────────────────────────────────────────
-var HISTORY_KEY = 'torah-pipeline-history';
-
-function loadHistory() {
-  try {
-    state.history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-  } catch (e) {
-    state.history = [];
-  }
-}
-
-function saveToHistory(record) {
-  loadHistory();
-  state.history = state.history.filter(function(r) { return r.id !== record.id; });
-  state.history.unshift(record);
-  if (state.history.length > 50) state.history = state.history.slice(0, 50);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(state.history));
-  showToast('נשמר בהיסטוריה');
-}
-
-function clearHistory() {
-  if (!confirm('למחוק את כל ההיסטוריה?')) return;
-  state.history = [];
-  localStorage.removeItem(HISTORY_KEY);
+/* ═══════════════ i18n ═══════════════ */
+function applyLang(lang) {
+  state.settings.lang = lang;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+  document.title = t('title');
+  document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.dataset.i18n; if (T[lang][k] != null) el.innerHTML = T[lang][k]; });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { const k = el.dataset.i18nPh; if (T[lang][k] != null) el.placeholder = T[lang][k]; });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { const k = el.dataset.i18nTitle; if (T[lang][k] != null) el.title = T[lang][k]; });
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  if (state.lastTranscript) document.getElementById('t-wordcount').textContent = wc(state.lastTranscript);
   renderHistory();
 }
+function setLang(lang) { applyLang(lang); persistSettings(); }
+function wc(text) { const words = (text.trim().match(/\S+/g) || []).length; return t('words') + ': ' + words + ' · ' + t('chars') + ': ' + text.length; }
 
+/* ═══════════════ Theme ═══════════════ */
+function applyTheme(dark) {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.getElementById('set-dark-mode').checked = dark;
+  state.settings.darkMode = dark;
+}
+function toggleTheme() { applyTheme(document.documentElement.getAttribute('data-theme') !== 'dark'); persistSettings(); }
+function syncThemeFromToggle() { applyTheme(document.getElementById('set-dark-mode').checked); persistSettings(); }
+
+/* ═══════════════ Tabs / methods ═══════════════ */
+function showTab(name) {
+  state.tab = name;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(name + '-tab').classList.add('active');
+  if (name === 'history') renderHistory();
+  if (name === 'settings') refreshConfigDots();
+  checkBanners();
+}
+function selectMethod(m) {
+  state.method = m;
+  document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('method-' + m).classList.add('selected');
+  document.querySelectorAll('.method-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane-' + m).classList.add('active');
+}
+
+/* ═══════════════ Recording ═══════════════ */
+async function toggleRecording() {
+  if (state.recording) { stopRecording(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(recChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+      const a = document.getElementById('rec-audio');
+      a.src = URL.createObjectURL(blob); a.style.display = '';
+      blobToBase64(blob).then(b64 => { state.audioBase64 = b64; state.source = 'record'; });
+      document.getElementById('rec-hint').textContent = t('recReady');
+    };
+    mediaRecorder.start();
+    state.recording = true; recStart = Date.now();
+    const btn = document.getElementById('rec-btn');
+    btn.classList.add('recording'); btn.textContent = '⏹';
+    document.getElementById('rec-timer').style.display = '';
+    document.getElementById('rec-wave').style.display = 'flex';
+    document.getElementById('rec-audio').style.display = 'none';
+    document.getElementById('rec-hint').textContent = t('recRecording');
+    recTimerId = setInterval(() => {
+      const s = Math.floor((Date.now() - recStart) / 1000);
+      document.getElementById('rec-timer').textContent = pad(Math.floor(s / 60)) + ':' + pad(s % 60);
+    }, 250);
+  } catch { showToast(t('micDenied'), 'error'); }
+}
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  state.recording = false; clearInterval(recTimerId);
+  const btn = document.getElementById('rec-btn');
+  btn.classList.remove('recording'); btn.textContent = '🎙️';
+  document.getElementById('rec-wave').style.display = 'none';
+}
+
+/* ═══════════════ Upload ═══════════════ */
+function setupDropzone() {
+  const dz = document.getElementById('dropzone');
+  ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('drag'); }));
+  ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('drag'); }));
+  dz.addEventListener('drop', e => { if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+}
+function handleFile(file) {
+  if (!file) return;
+  state.fileName = file.name;
+  document.getElementById('fc-name').textContent = file.name;
+  document.getElementById('fc-size').textContent = formatSize(file.size);
+  document.getElementById('file-chip').classList.add('show');
+  blobToBase64(file).then(b64 => { state.audioBase64 = b64; state.source = 'upload'; });
+}
+function clearFile() {
+  state.audioBase64 = null; state.fileName = null; state.source = null;
+  document.getElementById('file-chip').classList.remove('show');
+  document.getElementById('file-input').value = '';
+}
+
+/* ═══════════════ Transcription (RunPod, client-side) ═══════════════ */
+async function startTranscription() {
+  if (state.busy) return;
+  let base64;
+  if (state.method === 'record') {
+    if (!state.audioBase64 || state.source !== 'record') { showToast(t('recordFirst'), 'error'); return; }
+    base64 = state.audioBase64;
+  } else {
+    if (!state.audioBase64 || state.source !== 'upload') { showToast(t('chooseFile'), 'error'); return; }
+    base64 = state.audioBase64;
+  }
+  const cfg = getCfg();
+  if (!cfg.IVRIT_API_KEY || !cfg.IVRIT_ENDPOINT_ID) { showToast(t('missingIvrit'), 'error'); showTab('settings'); return; }
+
+  const source = state.method;
+  hide('t-error'); hide('t-result');
+  state.busy = true; document.getElementById('transcribe-btn').disabled = true;
+  showLoading('t', t('statusUploading')); setProgress('t', 25);
+
+  try {
+    const text = await transcribeViaRunpod(base64, cfg, (msg, pct) => { document.getElementById('t-loading-text').textContent = msg; setProgress('t', pct); });
+    hideLoading('t');
+    showTranscript(text);
+    state.stats.transcriptions++;
+    if (source === 'record') state.stats.recordings++;
+    saveStats(); updateStats();
+    if (state.settings.saveHistory) addHistory({ id: Date.now().toString(), source, timestamp: Date.now(), text });
+    if (state.settings.notifications) showToast(t('transcribeDone'), 'success');
+  } catch (err) {
+    hideLoading('t'); showError('t', err.message);
+    if (state.settings.notifications) showToast('❌ ' + err.message, 'error');
+  }
+  state.busy = false; document.getElementById('transcribe-btn').disabled = false;
+}
+
+async function transcribeViaRunpod(base64, cfg, onStatus) {
+  const ep = cfg.IVRIT_ENDPOINT_ID;
+  const headers = { 'Authorization': 'Bearer ' + cfg.IVRIT_API_KEY, 'Content-Type': 'application/json' };
+  onStatus(t('statusUploading'), 35);
+  const runRes = await fetch('https://api.runpod.ai/v2/' + ep + '/run', {
+    method: 'POST', headers,
+    body: JSON.stringify({ input: { engine: 'faster-whisper', model: 'ivrit-ai/whisper-large-v3-turbo-ct2', transcribe_args: { blob: base64 } } }),
+  });
+  if (!runRes.ok) {
+    if (runRes.status === 401) throw new Error(t('missingIvrit'));
+    throw new Error('RunPod ' + runRes.status);
+  }
+  const job = await runRes.json();
+  if (!job.id) throw new Error(t('txFailed'));
+
+  let pct = 42;
+  for (;;) {
+    await sleep(3000);
+    const st = await (await fetch('https://api.runpod.ai/v2/' + ep + '/status/' + job.id, { headers: { 'Authorization': 'Bearer ' + cfg.IVRIT_API_KEY } })).json();
+    if (st.status === 'COMPLETED') {
+      onStatus(t('statusProcessing'), 100);
+      const text = extractTranscription(st);
+      if (!text) throw new Error(t('txFailed'));
+      return text;
+    }
+    if (st.status === 'FAILED' || st.status === 'CANCELLED' || st.status === 'TIMED_OUT') {
+      throw new Error((st.error && String(st.error).slice(0, 120)) || t('txFailed'));
+    }
+    onStatus(st.status === 'IN_QUEUE' ? t('statusQueue') : t('statusProcessing'), pct = Math.min(pct + 4, 92));
+  }
+}
+
+function extractTranscription(responseData) {
+  try {
+    const batches = responseData?.output?.[0]?.result;
+    if (Array.isArray(batches)) {
+      const texts = [];
+      for (const batch of batches) {
+        if (!Array.isArray(batch)) continue;
+        for (const ev of batch) {
+          if (ev.type === 'segments' && Array.isArray(ev.data)) for (const s of ev.data) if (s.text) texts.push(s.text.trim());
+        }
+      }
+      if (texts.length) return texts.join(' ').trim();
+    }
+    const out = responseData?.output;
+    return out?.transcription || out?.text || (Array.isArray(out?.segments) ? out.segments.map(s => s.text).join(' ') : null) || null;
+  } catch { return null; }
+}
+
+function showTranscript(text) {
+  state.lastTranscript = text;
+  document.getElementById('t-text').textContent = text;
+  document.getElementById('t-wordcount').textContent = wc(text);
+  show('t-result');
+  document.getElementById('t-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function copyTranscript() { navigator.clipboard.writeText(state.lastTranscript || '').then(() => showToast(t('copied'), 'success')); }
+function downloadTranscript() { downloadText(state.lastTranscript, 'transcript'); }
+
+/* ═══════════════ YouTube download (RapidAPI, client-side) ═══════════════ */
+async function convertYoutube() {
+  if (state.busy) return;
+  const url = document.getElementById('yt-url').value.trim();
+  if (!url) { showToast(t('pasteUrlMsg'), 'error'); return; }
+  const videoId = extractVideoId(url);
+  if (!videoId) { showToast(t('invalidUrl'), 'error'); return; }
+  const cfg = getCfg();
+  if (!cfg.RAPIDAPI_KEY) { showToast(t('missingRapid'), 'error'); showTab('settings'); return; }
+
+  hide('y-error'); hide('y-result');
+  state.busy = true; document.getElementById('yt-btn').disabled = true;
+  showLoading('y', t('statusConnecting')); setProgress('y', 30);
+
+  try {
+    const data = await resolveYoutube(videoId, cfg, (msg, pct) => { document.getElementById('y-loading-text').textContent = msg; setProgress('y', pct); });
+    setProgress('y', 100); hideLoading('y');
+    state.ytData = { ...data, videoId, youtubeUrl: url };
+    showYoutubeResult(state.ytData);
+    state.stats.downloads++; saveStats(); updateStats();
+    if (state.settings.notifications) showToast(t('convertDone'), 'success');
+  } catch (err) {
+    hideLoading('y'); showError('y', err.message);
+    if (state.settings.notifications) showToast('❌ ' + err.message, 'error');
+  }
+  state.busy = false; document.getElementById('yt-btn').disabled = false;
+}
+
+async function resolveYoutube(videoId, cfg, onStatus) {
+  const headers = { 'x-rapidapi-key': cfg.RAPIDAPI_KEY, 'x-rapidapi-host': 'youtube-mp36.p.rapidapi.com' };
+  for (let i = 0; i < 15; i++) {
+    onStatus(t('statusConverting') + ' (' + (i + 1) + '/15)', Math.min(30 + i * 4, 90));
+    const res = await fetch('https://youtube-mp36.p.rapidapi.com/dl?id=' + videoId, { headers });
+    if (res.status === 401 || res.status === 403) throw new Error(t('missingRapid'));
+    const data = await res.json();
+    if (data.status === 'ok') return data;
+    if (data.status === 'processing' || data.status === 'in process') { await sleep(4000); continue; }
+    throw new Error(data.msg || data.status || t('txFailed'));
+  }
+  throw new Error(t('timeoutMsg'));
+}
+
+function showYoutubeResult(data) {
+  document.getElementById('y-thumb').src = 'https://img.youtube.com/vi/' + data.videoId + '/mqdefault.jpg';
+  document.getElementById('y-title').textContent = data.title || '—';
+  if (data.duration) document.getElementById('y-duration').textContent = '⏱ ' + formatDuration(data.duration);
+  const dl = document.getElementById('y-download');
+  dl.href = data.link || data.mp3Url || '#';
+  dl.download = (data.title || 'audio') + '.mp3';
+  show('y-result');
+  document.getElementById('y-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ═══════════════ Loading / error helpers ═══════════════ */
+function showLoading(p, text) {
+  const el = document.getElementById(p + '-loading');
+  el.classList.add('show');
+  document.getElementById(p + '-loading-text').textContent = text;
+  const elapsedEl = document.getElementById(p + '-loading-elapsed');
+  if (elapsedEl) {
+    const start = Date.now();
+    clearInterval(loadTimerId);
+    loadTimerId = setInterval(() => { elapsedEl.textContent = Math.floor((Date.now() - start) / 1000) + 's'; }, 500);
+  }
+}
+function hideLoading(p) { document.getElementById(p + '-loading').classList.remove('show'); clearInterval(loadTimerId); }
+function setProgress(p, pct) { document.getElementById(p + '-progress-fill').style.width = pct + '%'; }
+function showError(p, msg) { const el = document.getElementById(p + '-error'); el.textContent = '❌ ' + msg; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 7000); }
+function show(id) { document.getElementById(id).classList.add('show'); }
+function hide(id) { const el = document.getElementById(id); el.classList.remove('show'); if (el.classList.contains('error')) el.style.display = 'none'; }
+
+/* ═══════════════ History ═══════════════ */
+function loadHistory() { try { state.history = JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch { state.history = []; } }
+function addHistory(rec) {
+  loadHistory();
+  state.history = state.history.filter(r => r.id !== rec.id);
+  state.history.unshift(rec);
+  if (state.history.length > 100) state.history = state.history.slice(0, 100);
+  localStorage.setItem(HKEY, JSON.stringify(state.history));
+}
+function clearHistory() {
+  if (!confirm(t('confirmClear'))) return;
+  state.history = []; localStorage.removeItem(HKEY);
+  state.stats = { transcriptions: 0, downloads: 0, recordings: 0 }; saveStats();
+  renderHistory(); updateStats();
+  showToast(t('historyCleared'), 'info');
+}
+function deleteHistory(id, e) {
+  e.stopPropagation();
+  loadHistory();
+  state.history = state.history.filter(r => r.id !== id);
+  localStorage.setItem(HKEY, JSON.stringify(state.history));
+  renderHistory();
+}
+function srcMeta(s) { return { record: { i: '🎙️', c: 'record', k: 'srcRecord' }, upload: { i: '📁', c: 'upload', k: 'srcUpload' }, link: { i: '🔗', c: 'link', k: 'srcLink' } }[s] || { i: '📁', c: 'upload', k: 'srcUpload' }; }
 function renderHistory() {
   loadHistory();
-  var grid = document.getElementById('history-grid');
-  var empty = document.getElementById('history-empty');
-  if (!grid) return;
+  const list = document.getElementById('history-list');
+  const clearBtn = document.getElementById('clear-history-btn');
+  const q = (document.getElementById('history-search').value || '').trim().toLowerCase();
+  const items = q ? state.history.filter(r => (r.text || '').toLowerCase().includes(q)) : state.history;
 
-  // Remove old cards
-  var oldCards = grid.querySelectorAll('.history-card');
-  oldCards.forEach(function(el) { el.remove(); });
-
-  if (state.history.length === 0) {
-    if (empty) empty.style.display = '';
+  if (!state.history.length) {
+    list.innerHTML = '<div class="empty-history"><div class="empty-history-icon">📭</div><p><strong>' + t('emptyTitle') + '</strong></p><p>' + t('emptySub') + '</p></div>';
+    clearBtn.style.display = 'none';
     return;
   }
-  if (empty) empty.style.display = 'none';
+  clearBtn.style.display = 'block';
+  if (!items.length) { list.innerHTML = '<div class="empty-history"><div class="empty-history-icon">🔍</div><p>' + t('noResults') + '</p></div>'; return; }
 
-  state.history.forEach(function(record, idx) {
-    var card = document.createElement('div');
-    card.className = 'history-card';
-    card.style.animationDelay = (idx * 0.05) + 's';
-
-    var thumbHtml = record.videoId
-      ? '<img class="history-thumb" src="https://img.youtube.com/vi/' + record.videoId + '/mqdefault.jpg" alt="thumbnail" onerror="this.style.display=\'none\'" loading="lazy" />'
-      : '<div class="history-thumb-placeholder">&#128214;</div>';
-
-    var date = new Date(record.timestamp).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    var statusLabel = record.status === 'done' ? 'הושלם' : record.status === 'error' ? 'שגיאה' : 'רץ';
-    var statusClass = record.status || 'done';
-
-    var resumeItems = '';
-    if (record.transcription) resumeItems += '<div class="resume-submenu-item" onclick="doResume(\'' + record.id + '\', 3)">&#129302; מהגהה (Claude)</div>';
-    if (record.parts) resumeItems += '<div class="resume-submenu-item" onclick="doResume(\'' + record.id + '\', 4)">&#9997;&#65039; מהשכתוב (GPT)</div>';
-    if (record.combined) resumeItems += '<div class="resume-submenu-item" onclick="doResume(\'' + record.id + '\', 5)">&#128196; ייצוא Word</div>';
-    if (record.filename) resumeItems += '<div class="resume-submenu-item" onclick="downloadFile(\'' + record.filename + '\')">&#8595; הורד Word קיים</div>';
-
-    card.innerHTML =
-      thumbHtml +
-      '<div class="history-body">' +
-      '<div class="history-title-text">' + escapeHtml(record.videoTitle || 'שיעור תורה') + '</div>' +
-      '<div class="history-meta">' +
-      '<span>' + date + '</span><span>&#8226;</span>' +
-      '<span class="status-badge ' + statusClass + '">' + statusLabel + '</span>' +
-      '</div>' +
-      '<div class="resume-btn-wrap" id="resume-wrap-' + record.id + '">' +
-      '<button class="resume-main-btn" onclick="toggleResumeMenu(\'' + record.id + '\')">' +
-      '<span>המשך מכאן &#9658;</span><span>&#8964;</span></button>' +
-      '<div class="resume-submenu" id="resume-menu-' + record.id + '">' + resumeItems + '</div>' +
-      '</div>' +
-      '</div>';
-
-    grid.appendChild(card);
+  list.innerHTML = '';
+  items.forEach(rec => {
+    const m = srcMeta(rec.source);
+    const date = new Date(rec.timestamp).toLocaleString(state.settings.lang === 'he' ? 'he-IL' : 'en-US', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    item.onclick = () => openModal(rec);
+    item.innerHTML =
+      '<div class="history-badge ' + m.c + '">' + m.i + ' ' + t(m.k) + '</div>' +
+      '<div class="history-details"><div class="history-preview"></div><div class="history-date">' + date + '</div></div>' +
+      '<div class="history-del" title="✕">🗑️</div>';
+    item.querySelector('.history-preview').textContent = rec.text;
+    item.querySelector('.history-del').onclick = e => deleteHistory(rec.id, e);
+    list.appendChild(item);
   });
 }
 
-function toggleResumeMenu(id) {
-  document.querySelectorAll('.resume-submenu.open').forEach(function(m) {
-    if (m.id !== 'resume-menu-' + id) m.classList.remove('open');
+/* ═══════════════ Stats ═══════════════ */
+function loadStats() { try { state.stats = Object.assign(state.stats, JSON.parse(localStorage.getItem(STKEY) || '{}')); } catch {} }
+function saveStats() { localStorage.setItem(STKEY, JSON.stringify(state.stats)); }
+function updateStats() {
+  document.getElementById('stat-transcriptions').textContent = state.stats.transcriptions;
+  document.getElementById('stat-downloads').textContent = state.stats.downloads;
+  document.getElementById('stat-recordings').textContent = state.stats.recordings;
+}
+
+/* ═══════════════ Modal ═══════════════ */
+function openModal(rec) {
+  state.modalText = rec.text;
+  const m = srcMeta(rec.source);
+  document.getElementById('modal-title').textContent = m.i + ' ' + t(m.k) + ' — ' + new Date(rec.timestamp).toLocaleString(state.settings.lang === 'he' ? 'he-IL' : 'en-US');
+  document.getElementById('modal-body').textContent = rec.text;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function copyModal() { navigator.clipboard.writeText(state.modalText || '').then(() => showToast(t('copied'), 'success')); }
+function downloadModal() { downloadText(state.modalText, 'transcript'); }
+
+/* ═══════════════ Settings / config ═══════════════ */
+function loadSettings() {
+  try { state.settings = Object.assign(state.settings, JSON.parse(localStorage.getItem(SKEY) || '{}')); } catch {}
+  document.getElementById('set-save-history').checked = state.settings.saveHistory !== false;
+  document.getElementById('set-notifications').checked = state.settings.notifications !== false;
+  applyTheme(!!state.settings.darkMode);
+  applyLang(state.settings.lang || 'he');
+}
+function persistSettings() { localStorage.setItem(SKEY, JSON.stringify(state.settings)); }
+function saveSettings() {
+  state.settings.saveHistory = document.getElementById('set-save-history').checked;
+  state.settings.notifications = document.getElementById('set-notifications').checked;
+  persistSettings();
+  const cfg = getCfg();
+  let changed = false;
+  CONFIG_KEYS.forEach(k => { const v = document.getElementById('cfg-' + k).value.trim(); if (v) { cfg[k] = v; changed = true; } });
+  if (changed) {
+    setCfg(cfg);
+    CONFIG_KEYS.forEach(k => { document.getElementById('cfg-' + k).value = ''; });
+  }
+  refreshConfigDots(); checkBanners();
+  showToast(t('settingsSaved'), 'success');
+}
+function refreshConfigDots() {
+  const cfg = getCfg();
+  CONFIG_KEYS.forEach(k => {
+    const dot = document.getElementById('dot-' + k);
+    const input = document.getElementById('cfg-' + k);
+    const has = !!(cfg[k] && cfg[k].trim());
+    if (dot) dot.classList.toggle('on', has);
+    if (input) input.placeholder = has ? '••• ' + mask(cfg[k]) : t('apiPh');
   });
-  var menu = document.getElementById('resume-menu-' + id);
-  if (menu) menu.classList.toggle('open');
 }
-
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.resume-btn-wrap')) {
-    document.querySelectorAll('.resume-submenu.open').forEach(function(m) { m.classList.remove('open'); });
-  }
-});
-
-function doResume(recordId, fromStep) {
-  var record = null;
-  for (var i = 0; i < state.history.length; i++) {
-    if (state.history[i].id === recordId) { record = state.history[i]; break; }
-  }
-  if (!record) { showToast('לא נמצא רשומה'); return; }
-
-  document.querySelectorAll('.resume-submenu.open').forEach(function(m) { m.classList.remove('open'); });
-
-  openResumeDlg(fromStep, record);
+function checkBanners() {
+  const cfg = getCfg();
+  document.getElementById('t-banner').classList.toggle('show', !(cfg.IVRIT_API_KEY && cfg.IVRIT_ENDPOINT_ID));
+  document.getElementById('y-banner').classList.toggle('show', !cfg.RAPIDAPI_KEY);
 }
+function mask(v) { return v.length <= 8 ? '••••' : v.slice(0, 4) + '••••' + v.slice(-4); }
+function toggleEye(id) { const el = document.getElementById(id); el.type = el.type === 'password' ? 'text' : 'password'; }
 
-// ── Resume edit dialog ────────────────────────────────────────────────────────
-var _pendingResume = null;
-
-var RESUME_DLG_CONFIG = {
-  3: {
-    title: 'המשך מתמלול',
-    badge: 'שלב 3 — הגהה',
-    hint: 'זהו התמלול הגולמי. ניתן לערוך לפני שממשיכים להגהה עם Claude.',
-    getContent: function(r) { return r.transcription || ''; },
-    confirmBtn: 'הגה עם Claude &#9654;',
-    buildExtra: function(r, text) {
-      return { youtubeUrl: r.youtubeUrl || null, transcription: text, parts: null, rewrittenText: null };
-    },
-  },
-  4: {
-    title: 'המשך מהגהה',
-    badge: 'שלב 4 — שכתוב GPT',
-    hint: 'אלו החלקים המוגהים על ידי Claude. ניתן לערוך לפני שממשיכים לשכתוב עם GPT.\nחלקים מופרדים בשורת "---".',
-    getContent: function(r) { return Array.isArray(r.parts) ? r.parts.join('\n\n---\n\n') : (r.parts || ''); },
-    confirmBtn: 'שכתב עם GPT &#9654;',
-    buildExtra: function(r, text) {
-      var parts = text.split(/\n+---\n+/).map(function(p) { return p.trim(); }).filter(Boolean);
-      return { youtubeUrl: r.youtubeUrl || null, transcription: r.transcription || null, parts: parts.length ? parts : [text], rewrittenText: null };
-    },
-  },
-  5: {
-    title: 'המשך משכתוב',
-    badge: 'שלב 5 — ייצוא Word',
-    hint: 'זהו הטקסט המשוכתב הסופי. ניתן לערוך לפני ייצוא לקובץ Word.',
-    getContent: function(r) { return r.combined || ''; },
-    confirmBtn: 'ייצא ל-Word &#9654;',
-    buildExtra: function(r, text) {
-      return { youtubeUrl: r.youtubeUrl || null, transcription: r.transcription || null, parts: r.parts || null, rewrittenText: text };
-    },
-  },
-};
-
-function openResumeDlg(fromStep, record) {
-  var cfg = RESUME_DLG_CONFIG[fromStep];
-  if (!cfg) { showToast('שלב לא מוכר'); return; }
-
-  var content = cfg.getContent(record);
-  if (!content) { showToast('אין נתונים לשלב זה בהיסטוריה'); return; }
-
-  _pendingResume = { fromStep: fromStep, record: record };
-
-  document.getElementById('resume-dlg-title').textContent = cfg.title;
-  document.getElementById('resume-dlg-badge').textContent = cfg.badge;
-  document.getElementById('resume-dlg-hint').textContent = cfg.hint;
-  document.getElementById('resume-dlg-textarea').value = content;
-  document.getElementById('resume-dlg-confirm-btn').innerHTML = cfg.confirmBtn;
-
-  document.getElementById('resume-dlg-overlay').classList.add('open');
-  setTimeout(function() { document.getElementById('resume-dlg-textarea').focus(); }, 120);
+/* ═══════════════ Input helpers ═══════════════ */
+async function pasteUrl() {
+  try { document.getElementById('yt-url').value = await navigator.clipboard.readText(); }
+  catch { showToast(t('clipboardDenied'), 'error'); }
 }
+function clearUrl() { document.getElementById('yt-url').value = ''; hide('y-result'); }
 
-function closeResumeDlg() {
-  document.getElementById('resume-dlg-overlay').classList.remove('open');
-  _pendingResume = null;
-}
-
-function handleResumeDlgOverlayClick(e) {
-  if (e.target === document.getElementById('resume-dlg-overlay')) closeResumeDlg();
-}
-
-function confirmResumeDlg() {
-  if (!_pendingResume) return;
-  var cfg = RESUME_DLG_CONFIG[_pendingResume.fromStep];
-  var text = document.getElementById('resume-dlg-textarea').value.trim();
-  if (!text) { showToast('הטקסט ריק'); return; }
-
-  var extraData = cfg.buildExtra(_pendingResume.record, text);
-  closeResumeDlg();
-  resumeFromStep(_pendingResume.fromStep, extraData);
-}
-
-// ── Toast ─────────────────────────────────────────────────────────────────────
-function showToast(message) {
-  var container = document.getElementById('toast-container');
-  var toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
-  container.appendChild(toast);
-
-  setTimeout(function() {
-    toast.classList.add('out');
-    setTimeout(function() { toast.remove(); }, 300);
-  }, 2500);
-}
-
-// ── Utilities ─────────────────────────────────────────────────────────────────
+/* ═══════════════ Utils ═══════════════ */
 function extractVideoId(url) {
-  if (!url) return null;
-  var m = url.match(/(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/);
-  return m ? m[1] : null;
+  const pats = [/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{6,20})/, /youtube\.com\/embed\/([A-Za-z0-9_-]{6,20})/, /youtube\.com\/(?:v|shorts)\/([A-Za-z0-9_-]{6,20})/, /[?&]v=([A-Za-z0-9_-]{6,20})/];
+  for (const p of pats) { const m = url.match(p); if (m && m[1]) return m[1]; }
+  return null;
 }
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result.split(',')[1]); r.onerror = reject; r.readAsDataURL(blob); });
+}
+function downloadText(text, prefix) {
+  if (!text) return;
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = prefix + '_' + new Date().toISOString().slice(0, 10) + '.txt';
+  a.click(); URL.revokeObjectURL(a.href);
+  showToast(t('downloadStarted'), 'success');
+}
+function formatSize(b) { if (b < 1024) return b + ' B'; if (b < 1048576) return (b / 1024).toFixed(0) + ' KB'; return (b / 1048576).toFixed(1) + ' MB'; }
+function formatDuration(sec) { sec = parseInt(sec) || 0; return Math.floor(sec / 60) + ':' + pad(sec % 60); }
+function pad(n) { return String(n).padStart(2, '0'); }
+function showToast(msg, type) {
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || 'info');
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => { el.classList.add('out'); el.addEventListener('animationend', () => el.remove()); }, 3500);
 }
 </script>
 </body>
