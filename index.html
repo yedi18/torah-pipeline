@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>תמלול שיעורי תורה</title>
+<title>תמלול שיעורים</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Heebo:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -128,8 +132,7 @@
       <span class="input-icon">🔗</span>
       <input type="text" id="yt-url" class="url-input" data-i18n-ph="ytPlaceholder" placeholder="https://youtube.com/watch?v=...  או  youtu.be/..." />
       <div class="input-actions">
-        <button class="input-action-btn paste-btn" onclick="pasteUrl()" data-i18n="btnPaste">📋 הדבק</button>
-        <button class="input-action-btn clear-input-btn" onclick="clearUrl()">✕</button>
+        <button class="input-action-btn clear-input-btn" onclick="clearUrl()" title="נקה">✕</button>
       </div>
     </div>
 
@@ -216,11 +219,16 @@
         <button class="help-toggle" onclick="toggleHelp(this)">❓ <span data-i18n="howToGetIvrit">איך משיגים את המפתחות של ivrit.ai?</span> <span class="chev">▾</span></button>
         <div class="help-body">
           <div class="tutorial-box">
-            <h3 data-i18n="ivritTutTitle">📖 איך משיגים את המפתחות של ivrit.ai</h3>
-            <div class="tutorial-step"><div class="step-number">1</div><div class="step-content"><strong data-i18n="ivritS1t">נכנסים ל-RunPod</strong><p data-i18n="ivritS1p">היכנסו ל-<a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> והתחברו (אפשר עם Google).</p></div></div>
-            <div class="tutorial-step"><div class="step-number">2</div><div class="step-content"><strong data-i18n="ivritS2t">פורסים את ivrit.ai</strong><p data-i18n="ivritS2p">צרו endpoint חדש עם ה-image של <code>ivrit-ai/runpod-serverless</code>.</p></div></div>
-            <div class="tutorial-step"><div class="step-number">3</div><div class="step-content"><strong data-i18n="ivritS3t">מעתיקים את ה-API Key</strong><p data-i18n="ivritS3p">בתפריט <strong>Settings → API Keys</strong> צרו מפתח חדש והדביקו אותו בשדה הראשון למעלה.</p></div></div>
-            <div class="tutorial-step"><div class="step-number">4</div><div class="step-content"><strong data-i18n="ivritS4t">מעתיקים את ה-Endpoint ID</strong><p data-i18n="ivritS4p">לחצו על ה-endpoint שיצרתם והעתיקו את ה-<strong>Endpoint ID</strong> לשדה השני.</p></div></div>
+            <h3 data-i18n="ivritTutTitle">📖 איך מפעילים את התמלול של ivrit.ai</h3>
+            <p class="tut-intro" data-i18n="ivritIntro">מנוע התמלול ivrit.ai מתמלל עברית באיכות גבוהה. כדי להשתמש בו צריך נקודת קצה (Endpoint) פרטית שרצה בענן של RunPod, ולכן נדרשים שני פרטים מ-RunPod: מפתח API ומזהה Endpoint. ההגדרה היא חד-פעמית ולוקחת כמה דקות.</p>
+            <p class="tut-links" data-i18n="ivritLinks">קישורים שימושיים: <a href="https://www.ivrit.ai" target="_blank" rel="noopener">האתר הרשמי של ivrit.ai</a> · <a href="https://www.youtube.com/watch?v=xr8RQRFERLs" target="_blank" rel="noopener">🎬 סרטון הסבר מצולם</a></p>
+            <div class="tutorial-step"><div class="step-number">1</div><div class="step-content"><strong data-i18n="ivritS1t">פתיחת חשבון ב-RunPod</strong><p data-i18n="ivritS1p">היכנסו ל-<a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> והתחברו (אפשר עם חשבון Google).</p></div></div>
+            <div class="tutorial-step"><div class="step-number">2</div><div class="step-content"><strong data-i18n="ivritS2t">טעינת קרדיט קטן</strong><p data-i18n="ivritS2p">בעמוד <strong>Billing</strong> מוסיפים סכום קטן. השירות מחויב לפי שימוש, וגם סכום נמוך מספיק להרבה שעות תמלול.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">3</div><div class="step-content"><strong data-i18n="ivritS3t">פריסת המנוע של ivrit.ai</strong><p data-i18n="ivritS3p">בלשונית <strong>Serverless</strong> לוחצים על <strong>New Endpoint</strong> ובוחרים את התבנית של ivrit.ai (ה-image בשם <code>ivrit-ai/runpod-serverless</code>).</p></div></div>
+            <div class="tutorial-step"><div class="step-number">4</div><div class="step-content"><strong data-i18n="ivritS4t">העתקת מפתח ה-API</strong><p data-i18n="ivritS4p">נכנסים ל-<strong>Settings → API Keys</strong>, יוצרים מפתח חדש ומדביקים אותו בשדה <strong>API Key</strong> למעלה.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">5</div><div class="step-content"><strong data-i18n="ivritS5t">העתקת מזהה ה-Endpoint</strong><p data-i18n="ivritS5p">פותחים את ה-Endpoint שיצרתם ומעתיקים את ה-<strong>Endpoint ID</strong> לשדה <strong>Endpoint ID</strong> למעלה.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">6</div><div class="step-content"><strong data-i18n="ivritS6t">שמירה</strong><p data-i18n="ivritS6p">לוחצים על <strong>שמור מפתחות API</strong> — וזהו, אפשר להתחיל לתמלל.</p></div></div>
+            <div class="tut-note" data-i18n="ivritCost">💡 השירות פועל בתשלום לפי שימוש, אך העלות לשעת תמלול נמוכה מאוד — כך שטעינת קרדיט קטנה מספיקה בדרך כלל לשעות רבות של שיעורים והקלטות.</div>
           </div>
         </div>
 
@@ -235,10 +243,12 @@
         <div class="help-body">
           <div class="tutorial-box">
             <h3 data-i18n="rapidTutTitle">📖 איך משיגים מפתח RapidAPI חינמי</h3>
-            <div class="tutorial-step"><div class="step-number">1</div><div class="step-content"><strong data-i18n="rapidS1t">פותחים את עמוד ה-API</strong><p data-i18n="rapidS1p">היכנסו ל-<a href="https://rapidapi.com/ytjar/api/youtube-mp36" target="_blank" rel="noopener">YouTube MP3 (ytjar) ב-RapidAPI</a>.</p></div></div>
-            <div class="tutorial-step"><div class="step-number">2</div><div class="step-content"><strong data-i18n="rapidS2t">נרשמים / מתחברים</strong><p data-i18n="rapidS2p">צרו חשבון חינמי (גם עם Google) או התחברו.</p></div></div>
-            <div class="tutorial-step"><div class="step-number">3</div><div class="step-content"><strong data-i18n="rapidS3t">נרשמים לחבילה החינמית</strong><p data-i18n="rapidS3p">לחצו על <strong>Subscribe to Test</strong> ובחרו את חבילת <code>BASIC</code> החינמית (ללא כרטיס אשראי).</p></div></div>
-            <div class="tutorial-step"><div class="step-number">4</div><div class="step-content"><strong data-i18n="rapidS4t">מעתיקים את המפתח</strong><p data-i18n="rapidS4p">בלשונית <strong>Endpoints</strong>, תחת <strong>Header Parameters</strong>, העתיקו את הערך של <code>X-RapidAPI-Key</code>.</p></div></div>
+            <p class="tut-intro" data-i18n="rapidIntro">להורדת אודיו מיוטיוב אין צורך במפתח של גוגל. האתר משתמש בשירות חיצוני בשם RapidAPI, שיש בו חבילה חינמית שמספיקה לשימוש יומיומי. ההרשמה אורכת דקה או שתיים ואינה דורשת כרטיס אשראי.</p>
+            <div class="tutorial-step"><div class="step-number">1</div><div class="step-content"><strong data-i18n="rapidS1t">פתיחת עמוד ה-API</strong><p data-i18n="rapidS1p">היכנסו לעמוד <a href="https://rapidapi.com/ytjar/api/youtube-mp36" target="_blank" rel="noopener">YouTube MP3 (ytjar) ב-RapidAPI</a>.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">2</div><div class="step-content"><strong data-i18n="rapidS2t">הרשמה או התחברות</strong><p data-i18n="rapidS2p">צרו חשבון חינמי (אפשר עם Google) או התחברו אם כבר יש לכם.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">3</div><div class="step-content"><strong data-i18n="rapidS3t">הצטרפות לחבילה החינמית</strong><p data-i18n="rapidS3p">לחצו על <strong>Subscribe to Test</strong> ובחרו בחבילת <code>BASIC</code> החינמית.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">4</div><div class="step-content"><strong data-i18n="rapidS4t">העתקת המפתח</strong><p data-i18n="rapidS4p">חזרו ללשונית <strong>Endpoints</strong>, ותחת <strong>Header Parameters</strong> העתיקו את הערך שמופיע ב-<code>X-RapidAPI-Key</code>.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">5</div><div class="step-content"><strong data-i18n="rapidS5t">הדבקה ושמירה</strong><p data-i18n="rapidS5p">הדביקו את המפתח בשדה למעלה ולחצו על <strong>שמור מפתחות API</strong>.</p></div></div>
           </div>
         </div>
 
@@ -290,6 +300,16 @@
         </div>
       </div>
 
+      <!-- About me -->
+      <div class="settings-group">
+        <div class="settings-title" data-i18n="aboutMeTitle">👤 עליי</div>
+        <div class="about-me" data-i18n="aboutMeText">
+          האתר נבנה על ידי <strong>ידידיה שאולי</strong>, מתוך מטרה להנגיש כלי תמלול פשוט, נוח ומהיר במיוחד לשיעורים, הקלטות וקבצי אודיו בעברית.<br><br>
+          אני עוסק בפיתוח תוכנה, אוטומציות וכלים מבוססי AI, ומשתדל לבנות פתרונות שימושיים שפשוט כיף להשתמש בהם.<br><br>
+          לצפייה בפרויקטים נוספים: <a href="https://github.com/yedi18" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -338,17 +358,24 @@ const T = {
     historyTitle: '📜 היסטוריית תמלולים', searchPh: 'חיפוש בהיסטוריה...',
     clearHistory: '🗑️ נקה את כל ההיסטוריה',
     statTranscriptions: 'תמלולים', statDownloads: 'הורדות מיוטיוב', statRecordings: 'הקלטות',
-    setIvritTitle: '🗝️ הגדרת התמלול (ivrit.ai)', ivritTutTitle: '📖 איך משיגים את המפתחות של ivrit.ai',
-    ivritS1t: 'נכנסים ל-RunPod', ivritS1p: 'היכנסו ל-<a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> והתחברו (אפשר עם Google).',
-    ivritS2t: 'פורסים את ivrit.ai', ivritS2p: 'צרו endpoint חדש עם ה-image של <code>ivrit-ai/runpod-serverless</code>.',
-    ivritS3t: 'מעתיקים את ה-API Key', ivritS3p: 'בתפריט <strong>Settings → API Keys</strong> צרו מפתח חדש והדביקו אותו בשדה הראשון למטה.',
-    ivritS4t: 'מעתיקים את ה-Endpoint ID', ivritS4p: 'לחצו על ה-endpoint שיצרתם והעתיקו את ה-<strong>Endpoint ID</strong> לשדה השני.',
+    setIvritTitle: '🗝️ הגדרת התמלול (ivrit.ai)', ivritTutTitle: '📖 איך מפעילים את התמלול של ivrit.ai',
+    ivritIntro: 'מנוע התמלול ivrit.ai מתמלל עברית באיכות גבוהה. כדי להשתמש בו צריך נקודת קצה (Endpoint) פרטית שרצה בענן של RunPod, ולכן נדרשים שני פרטים מ-RunPod: מפתח API ומזהה Endpoint. ההגדרה היא חד-פעמית ולוקחת כמה דקות.',
+    ivritLinks: 'קישורים שימושיים: <a href="https://www.ivrit.ai" target="_blank" rel="noopener">האתר הרשמי של ivrit.ai</a> · <a href="https://www.youtube.com/watch?v=xr8RQRFERLs" target="_blank" rel="noopener">🎬 סרטון הסבר מצולם</a>',
+    ivritS1t: 'פתיחת חשבון ב-RunPod', ivritS1p: 'היכנסו ל-<a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> והתחברו (אפשר עם חשבון Google).',
+    ivritS2t: 'טעינת קרדיט קטן', ivritS2p: 'בעמוד <strong>Billing</strong> מוסיפים סכום קטן. השירות מחויב לפי שימוש, וגם סכום נמוך מספיק להרבה שעות תמלול.',
+    ivritS3t: 'פריסת המנוע של ivrit.ai', ivritS3p: 'בלשונית <strong>Serverless</strong> לוחצים על <strong>New Endpoint</strong> ובוחרים את התבנית של ivrit.ai (ה-image בשם <code>ivrit-ai/runpod-serverless</code>).',
+    ivritS4t: 'העתקת מפתח ה-API', ivritS4p: 'נכנסים ל-<strong>Settings → API Keys</strong>, יוצרים מפתח חדש ומדביקים אותו בשדה <strong>API Key</strong> למעלה.',
+    ivritS5t: 'העתקת מזהה ה-Endpoint', ivritS5p: 'פותחים את ה-Endpoint שיצרתם ומעתיקים את ה-<strong>Endpoint ID</strong> לשדה <strong>Endpoint ID</strong> למעלה.',
+    ivritS6t: 'שמירה', ivritS6p: 'לוחצים על <strong>שמור מפתחות API</strong> — וזהו, אפשר להתחיל לתמלל.',
+    ivritCost: '💡 השירות פועל בתשלום לפי שימוש, אך העלות לשעת תמלול נמוכה מאוד — כך שטעינת קרדיט קטנה מספיקה בדרך כלל לשעות רבות של שיעורים והקלטות.',
     labelIvritKey: 'ivrit.ai — API Key (RunPod)', labelIvritEp: 'ivrit.ai — Endpoint ID',
     setRapidTitle: '🔑 הורדת יוטיוב (RapidAPI) — אופציונלי', rapidTutTitle: '📖 איך משיגים מפתח RapidAPI חינמי',
-    rapidS1t: 'פותחים את עמוד ה-API', rapidS1p: 'היכנסו ל-<a href="https://rapidapi.com/ytjar/api/youtube-mp36" target="_blank" rel="noopener">YouTube MP3 (ytjar) ב-RapidAPI</a>.',
-    rapidS2t: 'נרשמים / מתחברים', rapidS2p: 'צרו חשבון חינמי (גם עם Google) או התחברו.',
-    rapidS3t: 'נרשמים לחבילה החינמית', rapidS3p: 'לחצו על <strong>Subscribe to Test</strong> ובחרו את חבילת <code>BASIC</code> החינמית (ללא כרטיס אשראי).',
-    rapidS4t: 'מעתיקים את המפתח', rapidS4p: 'בלשונית <strong>Endpoints</strong>, תחת <strong>Header Parameters</strong>, העתיקו את הערך של <code>X-RapidAPI-Key</code>.',
+    rapidIntro: 'להורדת אודיו מיוטיוב אין צורך במפתח של גוגל. האתר משתמש בשירות חיצוני בשם RapidAPI, שיש בו חבילה חינמית שמספיקה לשימוש יומיומי. ההרשמה אורכת דקה או שתיים ואינה דורשת כרטיס אשראי.',
+    rapidS1t: 'פתיחת עמוד ה-API', rapidS1p: 'היכנסו לעמוד <a href="https://rapidapi.com/ytjar/api/youtube-mp36" target="_blank" rel="noopener">YouTube MP3 (ytjar) ב-RapidAPI</a>.',
+    rapidS2t: 'הרשמה או התחברות', rapidS2p: 'צרו חשבון חינמי (אפשר עם Google) או התחברו אם כבר יש לכם.',
+    rapidS3t: 'הצטרפות לחבילה החינמית', rapidS3p: 'לחצו על <strong>Subscribe to Test</strong> ובחרו בחבילת <code>BASIC</code> החינמית.',
+    rapidS4t: 'העתקת המפתח', rapidS4p: 'חזרו ללשונית <strong>Endpoints</strong>, ותחת <strong>Header Parameters</strong> העתיקו את הערך שמופיע ב-<code>X-RapidAPI-Key</code>.',
+    rapidS5t: 'הדבקה ושמירה', rapidS5p: 'הדביקו את המפתח בשדה למעלה ולחצו על <strong>שמור מפתחות API</strong>.',
     labelRapid: 'RapidAPI — X-RapidAPI-Key', apiPh: 'הדביקו כאן את הערך...',
     setAppTitle: '🎛️ הגדרות אפליקציה',
     setLangLabel: 'שפה', setLangDesc: 'שפת הממשק',
@@ -363,10 +390,11 @@ const T = {
     /* dynamic */
     micDenied: 'אין גישה למיקרופון', recordFirst: 'הקליטו תחילה', chooseFile: 'בחרו קובץ',
     pasteUrlMsg: 'הדביקו קישור', copied: 'הועתק ללוח', downloadStarted: 'ההורדה החלה',
-    transcribeDone: 'התמלול הושלם ✅', convertDone: 'ההמרה הושלמה ✅', settingsSaved: 'ההגדרות נשמרו ✅',
+    transcribeDone: 'התמלול הסתיים בהצלחה ✅', convertDone: 'ההמרה הושלמה ✅', settingsSaved: 'ההגדרות נשמרו ✅',
     historyCleared: 'ההיסטוריה נמחקה', clipboardDenied: 'אין גישה ללוח — הדביקו ידנית (Ctrl+V)',
-    statusUploading: 'מעלה לשרת התמלול...', statusQueue: 'ממתין בתור...', statusProcessing: 'מתמלל...',
+    statusUploading: 'שולח לתמלול...', statusQueue: 'ממתין בתור...', statusProcessing: 'מתמלל כעת...', statusTranscribingNow: 'מתמלל כעת...',
     statusConverting: 'ממיר לאודיו...', statusConnecting: 'מתחבר ל-YouTube...',
+    statusDownloadingYt: 'מוריד את הסרטון מיוטיוב...', statusDownloadDone: 'ההורדה הסתיימה. מתחיל תמלול...',
     words: 'מילים', chars: 'תווים', noResults: 'לא נמצאו תוצאות',
     emptyTitle: 'עדיין אין תמלולים', emptySub: 'התמלולים שלכם יופיעו כאן',
     invalidUrl: 'קישור YouTube לא תקין', timeoutMsg: 'תם הזמן הקצוב להמרה', txFailed: 'התמלול נכשל',
@@ -376,7 +404,8 @@ const T = {
     optional: 'אופציונלי', saveApiKeys: '💾 שמור מפתחות API', apiStatusNote: '🔒 המפתחות נשמרים מקומית בדפדפן בלבד.', apiSaved: 'המפתחות נשמרו ✅',
     ytModeLabel: 'מצב קישור YouTube', ytModeDesc: 'מה לעשות כשמדביקים קישור', ytModeDownload: 'הורדה בלבד', ytModeTranscribe: 'תמלול אוטומטי',
     btnConvertDownload: '🚀 המר והורד', btnConvertTranscribe: '🚀 המר ותמלל', btnTranscribeThis: '🎙️ תמלל את זה', showSource: 'הצג סרטון מקור / הורדה',
-    statusFetching: 'מוריד את האודיו לתמלול...', ytFetchFail: 'לא ניתן למשוך את האודיו לתמלול ישיר. הורידו את הקובץ וגררו ללשונית "תמלול".', langSwitchTitle: 'החלף שפה',
+    statusFetching: 'מכין את האודיו לתמלול...', ytFetchFail: 'לא ניתן למשוך את האודיו לתמלול ישיר. הורידו את הקובץ וגררו ללשונית "תמלול".', langSwitchTitle: 'החלף שפה',
+    aboutMeTitle: '👤 עליי', aboutMeText: 'האתר נבנה על ידי <strong>ידידיה שאולי</strong>, מתוך מטרה להנגיש כלי תמלול פשוט, נוח ומהיר במיוחד לשיעורים, הקלטות וקבצי אודיו בעברית.<br><br>אני עוסק בפיתוח תוכנה, אוטומציות וכלים מבוססי AI, ומשתדל לבנות פתרונות שימושיים שפשוט כיף להשתמש בהם.<br><br>לצפייה בפרויקטים נוספים: <a href="https://github.com/yedi18" target="_blank" rel="noopener">GitHub</a>',
   },
   en: {
     title: 'Torah Lecture Transcription', h1: 'Lecture Transcription',
@@ -399,17 +428,24 @@ const T = {
     historyTitle: '📜 Transcription history', searchPh: 'Search history...',
     clearHistory: '🗑️ Clear all history',
     statTranscriptions: 'Transcriptions', statDownloads: 'YouTube downloads', statRecordings: 'Recordings',
-    setIvritTitle: '🗝️ Transcription setup (ivrit.ai)', ivritTutTitle: '📖 How to get your ivrit.ai keys',
-    ivritS1t: 'Open RunPod', ivritS1p: 'Go to <a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> and sign in (Google works too).',
-    ivritS2t: 'Deploy ivrit.ai', ivritS2p: 'Create a new endpoint using the <code>ivrit-ai/runpod-serverless</code> image.',
-    ivritS3t: 'Copy the API Key', ivritS3p: 'Under <strong>Settings → API Keys</strong>, create a key and paste it into the first field below.',
-    ivritS4t: 'Copy the Endpoint ID', ivritS4p: 'Click the endpoint you created and copy its <strong>Endpoint ID</strong> into the second field.',
+    setIvritTitle: '🗝️ Transcription setup (ivrit.ai)', ivritTutTitle: '📖 How to set up ivrit.ai transcription',
+    ivritIntro: 'The ivrit.ai engine transcribes Hebrew at high quality. To use it you need a private Endpoint running on the RunPod cloud, so two details from RunPod are required: an API key and an Endpoint ID. This is a one-time setup that takes a few minutes.',
+    ivritLinks: 'Useful links: <a href="https://www.ivrit.ai" target="_blank" rel="noopener">official ivrit.ai site</a> · <a href="https://www.youtube.com/watch?v=xr8RQRFERLs" target="_blank" rel="noopener">🎬 video walkthrough</a>',
+    ivritS1t: 'Create a RunPod account', ivritS1p: 'Go to <a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> and sign in (Google works too).',
+    ivritS2t: 'Add a small amount of credit', ivritS2p: 'On the <strong>Billing</strong> page add a small amount. The service is pay-as-you-go, and even a low amount covers many hours of transcription.',
+    ivritS3t: 'Deploy the ivrit.ai engine', ivritS3p: 'On the <strong>Serverless</strong> tab click <strong>New Endpoint</strong> and pick the ivrit.ai template (the <code>ivrit-ai/runpod-serverless</code> image).',
+    ivritS4t: 'Copy the API Key', ivritS4p: 'Go to <strong>Settings → API Keys</strong>, create a new key and paste it into the <strong>API Key</strong> field above.',
+    ivritS5t: 'Copy the Endpoint ID', ivritS5p: 'Open the endpoint you created and copy its <strong>Endpoint ID</strong> into the <strong>Endpoint ID</strong> field above.',
+    ivritS6t: 'Save', ivritS6p: 'Click <strong>Save API keys</strong> — that’s it, you can start transcribing.',
+    ivritCost: '💡 The service is pay-as-you-go, but the cost per transcribed hour is very low — so even a small amount of credit is usually enough for many lessons and recordings.',
     labelIvritKey: 'ivrit.ai — API Key (RunPod)', labelIvritEp: 'ivrit.ai — Endpoint ID',
     setRapidTitle: '🔑 YouTube download (RapidAPI) — optional', rapidTutTitle: '📖 How to get a free RapidAPI key',
+    rapidIntro: 'Downloading audio from YouTube does not require a Google key. The site uses an external service called RapidAPI, which has a free plan that is enough for everyday use. Signing up takes a minute or two and needs no credit card.',
     rapidS1t: 'Open the API page', rapidS1p: 'Go to <a href="https://rapidapi.com/ytjar/api/youtube-mp36" target="_blank" rel="noopener">YouTube MP3 (ytjar) on RapidAPI</a>.',
-    rapidS2t: 'Sign up / log in', rapidS2p: 'Create a free account (Google works too) or log in.',
-    rapidS3t: 'Subscribe to the free plan', rapidS3p: 'Click <strong>Subscribe to Test</strong> and pick the free <code>BASIC</code> plan (no credit card).',
-    rapidS4t: 'Copy the key', rapidS4p: 'On the <strong>Endpoints</strong> tab, under <strong>Header Parameters</strong>, copy the <code>X-RapidAPI-Key</code> value.',
+    rapidS2t: 'Sign up or log in', rapidS2p: 'Create a free account (Google works too) or log in if you already have one.',
+    rapidS3t: 'Join the free plan', rapidS3p: 'Click <strong>Subscribe to Test</strong> and choose the free <code>BASIC</code> plan.',
+    rapidS4t: 'Copy the key', rapidS4p: 'Back on the <strong>Endpoints</strong> tab, under <strong>Header Parameters</strong>, copy the value shown for <code>X-RapidAPI-Key</code>.',
+    rapidS5t: 'Paste and save', rapidS5p: 'Paste the key into the field above and click <strong>Save API keys</strong>.',
     labelRapid: 'RapidAPI — X-RapidAPI-Key', apiPh: 'Paste the value here...',
     setAppTitle: '🎛️ App settings',
     setLangLabel: 'Language', setLangDesc: 'Interface language',
@@ -425,8 +461,9 @@ const T = {
     pasteUrlMsg: 'Paste a link', copied: 'Copied to clipboard', downloadStarted: 'Download started',
     transcribeDone: 'Transcription complete ✅', convertDone: 'Conversion complete ✅', settingsSaved: 'Settings saved ✅',
     historyCleared: 'History cleared', clipboardDenied: 'Clipboard blocked — paste manually (Ctrl+V)',
-    statusUploading: 'Uploading to transcription server...', statusQueue: 'Waiting in queue...', statusProcessing: 'Transcribing...',
+    statusUploading: 'Sending for transcription...', statusQueue: 'Waiting in queue...', statusProcessing: 'Transcribing now...', statusTranscribingNow: 'Transcribing now...',
     statusConverting: 'Converting audio...', statusConnecting: 'Connecting to YouTube...',
+    statusDownloadingYt: 'Downloading the video from YouTube...', statusDownloadDone: 'Download complete. Starting transcription...',
     words: 'words', chars: 'characters', noResults: 'No results found',
     emptyTitle: 'No transcriptions yet', emptySub: 'Your transcriptions will appear here',
     invalidUrl: 'Invalid YouTube URL', timeoutMsg: 'Conversion timed out', txFailed: 'Transcription failed',
@@ -436,7 +473,8 @@ const T = {
     optional: 'optional', saveApiKeys: '💾 Save API keys', apiStatusNote: '🔒 Keys are stored locally in your browser only.', apiSaved: 'API keys saved ✅',
     ytModeLabel: 'YouTube link mode', ytModeDesc: 'What happens when you paste a link', ytModeDownload: 'Download only', ytModeTranscribe: 'Auto-transcribe',
     btnConvertDownload: '🚀 Convert & download', btnConvertTranscribe: '🚀 Convert & transcribe', btnTranscribeThis: '🎙️ Transcribe this', showSource: 'Show source video / download',
-    statusFetching: 'Fetching audio for transcription...', ytFetchFail: 'Couldn’t fetch the audio for direct transcription. Download the file and drop it into the "Transcribe" tab.', langSwitchTitle: 'Switch language',
+    statusFetching: 'Preparing the audio for transcription...', ytFetchFail: 'Couldn’t fetch the audio for direct transcription. Download the file and drop it into the "Transcribe" tab.', langSwitchTitle: 'Switch language',
+    aboutMeTitle: '👤 About me', aboutMeText: 'This site was built by <strong>Yedidya Shauli</strong>, with the goal of making a simple, convenient and fast transcription tool for Hebrew lessons, recordings and audio files.<br><br>I work in software development, automation and AI-based tools, and I try to build useful solutions that are simply fun to use.<br><br>See more projects: <a href="https://github.com/yedi18" target="_blank" rel="noopener">GitHub</a>',
   },
 };
 function t(k) { return (T[state.settings.lang] && T[state.settings.lang][k]) || T.he[k] || k; }
@@ -612,7 +650,7 @@ async function startTranscription() {
   showLoading('t', t('statusUploading')); setProgress('t', 25);
 
   try {
-    const text = await transcribeViaRunpod(base64, cfg, (msg, pct) => { document.getElementById('t-loading-text').textContent = msg; setProgress('t', pct); });
+    const text = await transcribeViaRunpod(base64, cfg, (msg, pct) => setLoad('t', msg, pct));
     hideLoading('t');
     showTranscript(text);
     state.stats.transcriptions++;
@@ -627,10 +665,11 @@ async function startTranscription() {
   state.busy = false; document.getElementById('transcribe-btn').disabled = false;
 }
 
-async function transcribeViaRunpod(base64, cfg, onStatus) {
+async function transcribeViaRunpod(base64, cfg, onStatus, basePct) {
+  basePct = basePct || 40;
   const ep = cfg.IVRIT_ENDPOINT_ID;
   const headers = { 'Authorization': 'Bearer ' + cfg.IVRIT_API_KEY, 'Content-Type': 'application/json' };
-  onStatus(t('statusUploading'), 35);
+  onStatus(t('statusUploading'), basePct);
   const runRes = await fetch('https://api.runpod.ai/v2/' + ep + '/run', {
     method: 'POST', headers,
     body: JSON.stringify({ input: { engine: 'faster-whisper', model: 'ivrit-ai/whisper-large-v3-turbo-ct2', transcribe_args: { blob: base64 } } }),
@@ -642,12 +681,12 @@ async function transcribeViaRunpod(base64, cfg, onStatus) {
   const job = await runRes.json();
   if (!job.id) throw new Error(t('txFailed'));
 
-  let pct = 42;
+  let pct = basePct + 5;
   for (;;) {
     await sleep(3000);
     const st = await (await fetch('https://api.runpod.ai/v2/' + ep + '/status/' + job.id, { headers: { 'Authorization': 'Bearer ' + cfg.IVRIT_API_KEY } })).json();
     if (st.status === 'COMPLETED') {
-      onStatus(t('statusProcessing'), 100);
+      onStatus(t('statusTranscribingNow'), 100);
       const text = extractTranscription(st);
       if (!text) throw new Error(t('txFailed'));
       return text;
@@ -655,7 +694,7 @@ async function transcribeViaRunpod(base64, cfg, onStatus) {
     if (st.status === 'FAILED' || st.status === 'CANCELLED' || st.status === 'TIMED_OUT') {
       throw new Error((st.error && String(st.error).slice(0, 120)) || t('txFailed'));
     }
-    onStatus(st.status === 'IN_QUEUE' ? t('statusQueue') : t('statusProcessing'), pct = Math.min(pct + 4, 92));
+    onStatus(st.status === 'IN_QUEUE' ? t('statusQueue') : t('statusTranscribingNow'), pct = Math.min(pct + 3, 96));
   }
 }
 
@@ -707,13 +746,13 @@ async function convertYoutube() {
   document.getElementById('y-main-badge').textContent = t('badgeConvert');
 
   state.busy = true; document.getElementById('yt-btn').disabled = true;
-  showLoading('y', t('statusConnecting')); setProgress('y', 30);
+  showLoading('y', t('statusDownloadingYt')); setProgress('y', 8);
 
   try {
-    const data = await resolveYoutube(videoId, cfg, (msg, pct) => { document.getElementById('y-loading-text').textContent = msg; setProgress('y', pct); });
+    const data = await resolveYoutube(videoId, cfg, (msg, pct) => setLoad('y', msg, pct));
     state.ytData = { ...data, videoId, youtubeUrl: url };
     state.stats.downloads++; saveStats(); updateStats();
-    showYoutubeResult(state.ytData, false);
+    showYoutubeResult(state.ytData);
 
     if (state.settings.ytMode === 'transcribe') {
       const cfg2 = getCfg();
@@ -721,6 +760,7 @@ async function convertYoutube() {
         setProgress('y', 100); hideLoading('y'); show('y-result');
         showToast(t('missingIvrit'), 'error'); showTab('settings');
       } else {
+        setLoad('y', t('statusDownloadDone'), 45);
         await doYoutubeTranscription(cfg2);
       }
     } else {
@@ -738,7 +778,7 @@ async function convertYoutube() {
 async function resolveYoutube(videoId, cfg, onStatus) {
   const headers = { 'x-rapidapi-key': cfg.RAPIDAPI_KEY, 'x-rapidapi-host': 'youtube-mp36.p.rapidapi.com' };
   for (let i = 0; i < 15; i++) {
-    onStatus(t('statusConverting') + ' (' + (i + 1) + '/15)', Math.min(30 + i * 4, 90));
+    onStatus(t('statusDownloadingYt'), Math.min(10 + i * 3, 40));
     const res = await fetch('https://youtube-mp36.p.rapidapi.com/dl?id=' + videoId, { headers });
     if (res.status === 401 || res.status === 403) throw new Error(t('missingRapid'));
     const data = await res.json();
@@ -779,11 +819,11 @@ async function doYoutubeTranscription(cfg) {
   const link = state.ytData.link || state.ytData.mp3Url;
   let base64;
   try {
-    base64 = await fetchAudioBase64(link, (msg, pct) => { document.getElementById('y-loading-text').textContent = msg; setProgress('y', pct); });
+    base64 = await fetchAudioBase64(link, (msg, pct) => setLoad('y', msg, pct));
   } catch (e) {
     throw new Error(t('ytFetchFail'));
   }
-  const text = await transcribeViaRunpod(base64, cfg, (msg, pct) => { document.getElementById('y-loading-text').textContent = msg; setProgress('y', pct); });
+  const text = await transcribeViaRunpod(base64, cfg, (msg, pct) => setLoad('y', msg, pct), 55);
   setProgress('y', 100); hideLoading('y');
 
   state.ytTranscript = text;
@@ -804,7 +844,7 @@ async function doYoutubeTranscription(cfg) {
 }
 
 async function fetchAudioBase64(url, onStatus) {
-  onStatus(t('statusFetching'), 45);
+  onStatus(t('statusFetching'), 50);
   const resp = await fetch(url);
   if (!resp.ok) throw new Error('audio ' + resp.status);
   const buf = await resp.arrayBuffer();
@@ -838,6 +878,11 @@ function showLoading(p, text) {
 }
 function hideLoading(p) { document.getElementById(p + '-loading').classList.remove('show'); clearInterval(loadTimerId); }
 function setProgress(p, pct) { document.getElementById(p + '-progress-fill').style.width = pct + '%'; }
+// Set the loading message and (optionally) append a live percentage.
+function setLoad(p, msg, pct) {
+  document.getElementById(p + '-loading-text').textContent = (pct != null) ? msg + ' ' + Math.round(pct) + '%' : msg;
+  if (pct != null) setProgress(p, pct);
+}
 function showError(p, msg) { const el = document.getElementById(p + '-error'); el.textContent = '❌ ' + msg; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 7000); }
 function show(id) { document.getElementById(id).classList.add('show'); }
 function hide(id) { const el = document.getElementById(id); el.classList.remove('show'); if (el.classList.contains('error')) el.style.display = 'none'; }
@@ -932,18 +977,22 @@ function saveApiKeys() {
   const cfg = getCfg();
   CONFIG_KEYS.forEach(k => { const v = document.getElementById('cfg-' + k).value.trim(); if (v) cfg[k] = v; });
   setCfg(cfg);
-  CONFIG_KEYS.forEach(k => { document.getElementById('cfg-' + k).value = ''; });
   refreshConfigDots(); checkBanners();
   showToast(t('apiSaved'), 'success');
 }
+// Keep the saved key in the field (masked by type=password); the eye button reveals it.
 function refreshConfigDots() {
   const cfg = getCfg();
   CONFIG_KEYS.forEach(k => {
     const dot = document.getElementById('dot-' + k);
     const input = document.getElementById('cfg-' + k);
-    const has = !!(cfg[k] && cfg[k].trim());
-    if (dot) dot.classList.toggle('on', has);
-    if (input) input.placeholder = has ? '••• ' + mask(cfg[k]) : t('apiPh');
+    const val = (cfg[k] || '').trim();
+    if (dot) dot.classList.toggle('on', !!val);
+    if (input) {
+      input.value = val;          // saved key stays visible (masked) so the user knows it's set
+      input.type = 'password';    // hidden by default
+      input.placeholder = t('apiPh');
+    }
   });
 }
 function checkBanners() {

@@ -24,9 +24,10 @@
     --shadow-md:      0 8px 24px rgba(0,0,0,.10);
     --shadow-lg:      0 20px 60px rgba(0,0,0,.20);
     --radius-sm:      8px;
-    --radius-md:      14px;
-    --radius-lg:      22px;
+    --radius-md:      12px;
+    --radius-lg:      16px;
     --transition:     0.25s ease;
+    --font-ui:        'Assistant', 'Heebo', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 
 [data-theme="dark"] {
@@ -50,11 +51,11 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    font-family: var(--font-ui);
     background: var(--bg-body);
     background-attachment: fixed;
     min-height: 100vh;
-    padding: 20px;
+    padding: 16px;
     transition: background var(--transition);
 }
 
@@ -89,7 +90,7 @@ body {
     border: 1px solid transparent;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
-    padding: 48px;
+    padding: 28px 32px;
     max-width: 900px; width: 100%; margin: 0 auto;
     animation: fadeIn 0.5s ease-out;
     transition: background var(--transition), box-shadow var(--transition);
@@ -101,13 +102,13 @@ body {
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 36px; gap: 16px; }
 .logo-section { flex: 1; min-width: 0; }
 .logo-icon {
-    font-size: 3em; margin-bottom: 4px; line-height: 1;
+    font-size: 2em; margin-bottom: 4px; line-height: 1;
     filter: drop-shadow(0 4px 10px rgba(102,126,234,.45));
     animation: float 3s ease-in-out infinite;
 }
 @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 h1 {
-    font-size: 2.3em; font-weight: 800; margin-bottom: 4px; line-height: 1.15;
+    font-size: 1.9em; font-weight: 800; margin-bottom: 4px; line-height: 1.15;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
@@ -176,7 +177,7 @@ h1 {
 /* ─── Method selector ─── */
 .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
 .method-card {
-    padding: 20px; background: var(--bg-card); border-radius: var(--radius-md);
+    padding: 14px; background: var(--bg-card); border-radius: var(--radius-md);
     text-align: center; cursor: pointer; transition: all var(--transition);
     border: 2px solid var(--border);
 }
@@ -195,7 +196,7 @@ h1 {
 /* ─── Record zone ─── */
 .record-zone {
     display: flex; flex-direction: column; align-items: center; gap: 16px;
-    padding: 30px 20px; background: var(--bg-card);
+    padding: 18px 20px; background: var(--bg-card);
     border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 20px;
 }
 .rec-circle {
@@ -219,7 +220,7 @@ h1 {
 /* ─── Dropzone ─── */
 .dropzone {
     border: 2px dashed var(--border); border-radius: var(--radius-md);
-    padding: 44px 24px; text-align: center; cursor: pointer; transition: all var(--transition);
+    padding: 28px 16px; text-align: center; cursor: pointer; transition: all var(--transition);
     background: var(--bg-card);
 }
 .dropzone:hover, .dropzone.drag { border-color: var(--accent); background: linear-gradient(135deg, var(--accent-soft), rgba(118,75,162,.05)); }
@@ -262,7 +263,7 @@ audio { width: 100%; height: 42px; margin-top: 16px; }
 
 /* ─── Primary action button ─── */
 .action-btn-lg {
-    width: 100%; padding: 19px;
+    width: 100%; padding: 13px;
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
     color: #fff; border: none; border-radius: var(--radius-md);
     font-size: 17px; font-weight: 800; cursor: pointer; font-family: inherit;
@@ -347,8 +348,8 @@ audio { width: 100%; height: 42px; margin-top: 16px; }
 .transcript-box {
     background: var(--bg-container); border: 1px solid var(--border); border-radius: var(--radius-md);
     padding: 22px 26px; max-height: 440px; overflow-y: auto;
-    font-family: 'David', 'Narkisim', 'Times New Roman', serif;
-    font-size: 16pt; line-height: 2; white-space: pre-wrap; word-break: break-word;
+    font-family: 'Heebo', 'Assistant', system-ui, sans-serif;
+    font-size: 15pt; line-height: 1.9; letter-spacing: .01em; white-space: pre-wrap; word-break: break-word;
     direction: rtl; text-align: right; color: var(--text-primary);
 }
 .word-count { color: var(--text-muted); font-size: .82em; margin-top: 10px; text-align: start; }
