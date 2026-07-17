@@ -3,7 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>תמלול שיעורים</title>
+<title>תמלול שיעורים · Torah Lecture Transcription</title>
+<meta name="description" content="תמלול מהיר ופשוט של שיעורים והקלטות בעברית — הקלטה, קובץ או יוטיוב. A fast, simple Hebrew lecture transcription app." />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="תמלול שיעורים · Torah Lecture Transcription" />
+<meta property="og:description" content="תמלול מהיר ופשוט של שיעורים והקלטות בעברית — הקלטה, קובץ או יוטיוב." />
+<meta property="og:url" content="https://yedi18.github.io/torah-pipeline/" />
+<meta property="og:image" content="https://yedi18.github.io/torah-pipeline/favicon.svg" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="תמלול שיעורים · Torah Lecture Transcription" />
+<meta name="twitter:description" content="תמלול מהיר ופשוט של שיעורים והקלטות בעברית — הקלטה, קובץ או יוטיוב." />
+<meta name="twitter:image" content="https://yedi18.github.io/torah-pipeline/favicon.svg" />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -201,6 +211,7 @@
       <!-- API keys -->
       <div class="settings-group">
         <div class="settings-title" data-i18n="apiKeysTitle">🔑 מפתחות API</div>
+        <div class="privacy-note" data-i18n="privacyNote">🔒 המפתחות נשמרים אך ורק בדפדפן שלכם (localStorage) ונשלחים ישירות לשירותים (RunPod / RapidAPI) — הם לא עוברים בשום שרת שלנו. השירותים פועלים בתשלום לפי שימוש.</div>
 
         <div class="api-input-group">
           <label><span class="cfg-dot" id="dot-IVRIT_API_KEY"></span> <span data-i18n="labelIvritKey">ivrit.ai — API Key (RunPod)</span></label>
@@ -401,6 +412,7 @@ const T = {
     missingIvrit: 'חסרים מפתחות ivrit.ai — עברו להגדרות', missingRapid: 'חסר מפתח RapidAPI — עברו להגדרות',
     confirmClear: 'למחוק את כל ההיסטוריה והסטטיסטיקה?', srcRecord: 'הקלטה', srcUpload: 'קובץ', srcLink: 'יוטיוב',
     apiKeysTitle: '🔑 מפתחות API', howToGetIvrit: 'איך משיגים את המפתחות של ivrit.ai?', howToGetRapid: 'איך משיגים מפתח RapidAPI חינמי?',
+    privacyNote: '🔒 המפתחות נשמרים אך ורק בדפדפן שלכם (localStorage) ונשלחים ישירות לשירותים (RunPod / RapidAPI) — הם לא עוברים בשום שרת שלנו. השירותים פועלים בתשלום לפי שימוש.',
     optional: 'אופציונלי', saveApiKeys: '💾 שמור מפתחות API', apiStatusNote: '🔒 המפתחות נשמרים מקומית בדפדפן בלבד.', apiSaved: 'המפתחות נשמרו ✅',
     ytModeLabel: 'מצב קישור YouTube', ytModeDesc: 'מה לעשות כשמדביקים קישור', ytModeDownload: 'הורדה בלבד', ytModeTranscribe: 'תמלול אוטומטי',
     btnConvertDownload: '🚀 המר והורד', btnConvertTranscribe: '🚀 המר ותמלל', btnTranscribeThis: '🎙️ תמלל את זה', showSource: 'הצג סרטון מקור / הורדה',
@@ -470,6 +482,7 @@ const T = {
     missingIvrit: 'Missing ivrit.ai keys — go to Settings', missingRapid: 'Missing RapidAPI key — go to Settings',
     confirmClear: 'Clear all history and stats?', srcRecord: 'Record', srcUpload: 'File', srcLink: 'YouTube',
     apiKeysTitle: '🔑 API keys', howToGetIvrit: 'How do I get the ivrit.ai keys?', howToGetRapid: 'How do I get a free RapidAPI key?',
+    privacyNote: '🔒 Your keys are stored only in your own browser (localStorage) and sent directly to the services (RunPod / RapidAPI) — they never pass through any server of ours. These services are paid, per-usage.',
     optional: 'optional', saveApiKeys: '💾 Save API keys', apiStatusNote: '🔒 Keys are stored locally in your browser only.', apiSaved: 'API keys saved ✅',
     ytModeLabel: 'YouTube link mode', ytModeDesc: 'What happens when you paste a link', ytModeDownload: 'Download only', ytModeTranscribe: 'Auto-transcribe',
     btnConvertDownload: '🚀 Convert & download', btnConvertTranscribe: '🚀 Convert & transcribe', btnTranscribeThis: '🎙️ Transcribe this', showSource: 'Show source video / download',
@@ -682,7 +695,9 @@ async function transcribeViaRunpod(base64, cfg, onStatus, basePct) {
   if (!job.id) throw new Error(t('txFailed'));
 
   let pct = basePct + 5;
-  for (;;) {
+  const MAX_POLLS = 200; // ~10 min at 3s/poll — safety cap so a stuck job can't spin forever
+  for (let poll = 0; ; poll++) {
+    if (poll >= MAX_POLLS) throw new Error(t('timeoutMsg'));
     await sleep(3000);
     const st = await (await fetch('https://api.runpod.ai/v2/' + ep + '/status/' + job.id, { headers: { 'Authorization': 'Bearer ' + cfg.IVRIT_API_KEY } })).json();
     if (st.status === 'COMPLETED') {

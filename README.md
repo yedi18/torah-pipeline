@@ -13,6 +13,8 @@ A fully static (no‑server) browser app for transcribing Hebrew lectures — re
 
 הכל רץ בדפדפן. המפתחות נשמרים מקומית ב‑`localStorage` בלבד ואינם נשלחים לשום מקום מלבד השירותים עצמם (RunPod / RapidAPI).
 
+> 💳 **Bring your own key / עלות:** כל משתמש מזין את המפתחות שלו. RunPod (ivrit.ai) ו‑RapidAPI הם שירותים **בתשלום לפי שימוש** — העלות לתמלול נמוכה, אך נדרש חשבון וקרדיט אצל כל ספק.
+
 ## 🚀 הפעלה / Run
 פשוט פותחים את `index.html` בדפדפן, או מארחים את התיקייה ב‑GitHub Pages.
 Just open `index.html`, or host the folder on GitHub Pages.

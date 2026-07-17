@@ -1,3 +1,6 @@
+// ⚠️ Legacy / experimental local server — NOT used by the static GitHub Pages site.
+// It exposes /api/config which reads & writes the local .env, so do NOT host it publicly as-is.
+// Kept for a future Claude/OpenAI proxy step (see README roadmap).
 const express = require('express');
 const axios = require('axios');
 const fs = require('fs');
