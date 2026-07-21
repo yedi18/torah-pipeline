@@ -231,15 +231,15 @@
         <div class="help-body">
           <div class="tutorial-box">
             <h3 data-i18n="ivritTutTitle">📖 איך מפעילים את התמלול של ivrit.ai</h3>
-            <p class="tut-intro" data-i18n="ivritIntro">מנוע התמלול ivrit.ai מתמלל עברית באיכות גבוהה. כדי להשתמש בו צריך נקודת קצה (Endpoint) פרטית שרצה בענן של RunPod, ולכן נדרשים שני פרטים מ-RunPod: מפתח API ומזהה Endpoint. ההגדרה היא חד-פעמית ולוקחת כמה דקות.</p>
+            <p class="tut-intro" data-i18n="ivritIntro">מנוע התמלול של ivrit.ai מתמלל עברית באיכות גבוהה. הוא רץ על שרת פרטי שלכם בענן של RunPod, וההגדרה היא חד-פעמית שלוקחת כמה דקות. בסוף התהליך תעתיקו שני ערכים מ-RunPod — <strong>API Key</strong> ו-<strong>Endpoint ID</strong> — לשדות שכאן למעלה.</p>
             <p class="tut-links" data-i18n="ivritLinks">קישורים שימושיים: <a href="https://www.ivrit.ai" target="_blank" rel="noopener">האתר הרשמי של ivrit.ai</a> · <a href="https://www.youtube.com/watch?v=xr8RQRFERLs" target="_blank" rel="noopener">🎬 סרטון הסבר מצולם</a></p>
             <div class="tutorial-step"><div class="step-number">1</div><div class="step-content"><strong data-i18n="ivritS1t">פתיחת חשבון ב-RunPod</strong><p data-i18n="ivritS1p">היכנסו ל-<a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> והתחברו (אפשר עם חשבון Google).</p></div></div>
             <div class="tutorial-step"><div class="step-number">2</div><div class="step-content"><strong data-i18n="ivritS2t">טעינת קרדיט קטן</strong><p data-i18n="ivritS2p">בעמוד <strong>Billing</strong> מוסיפים סכום קטן. השירות מחויב לפי שימוש, וגם סכום נמוך מספיק להרבה שעות תמלול.</p></div></div>
-            <div class="tutorial-step"><div class="step-number">3</div><div class="step-content"><strong data-i18n="ivritS3t">פריסת המנוע של ivrit.ai</strong><p data-i18n="ivritS3p">בלשונית <strong>Serverless</strong> לוחצים על <strong>New Endpoint</strong> ובוחרים את התבנית של ivrit.ai (ה-image בשם <code>ivrit-ai/runpod-serverless</code>).</p></div></div>
-            <div class="tutorial-step"><div class="step-number">4</div><div class="step-content"><strong data-i18n="ivritS4t">העתקת מפתח ה-API</strong><p data-i18n="ivritS4p">נכנסים ל-<strong>Settings → API Keys</strong>, יוצרים מפתח חדש ומדביקים אותו בשדה <strong>API Key</strong> למעלה.</p></div></div>
-            <div class="tutorial-step"><div class="step-number">5</div><div class="step-content"><strong data-i18n="ivritS5t">העתקת מזהה ה-Endpoint</strong><p data-i18n="ivritS5p">פותחים את ה-Endpoint שיצרתם ומעתיקים את ה-<strong>Endpoint ID</strong> לשדה <strong>Endpoint ID</strong> למעלה.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">3</div><div class="step-content"><strong data-i18n="ivritS3t">פריסת המנוע (Deploy בלחיצה)</strong><p data-i18n="ivritS3p">בשורת החיפוש של RunPod חפשו <strong>ivrit</strong>, פתחו את התבנית הרשמית של ivrit.ai ולחצו <strong>Deploy</strong>. מומלץ לבחור את ה-GPU הזול ביותר ולהגדיר <strong>Active Workers = 0</strong> — כך תשלמו רק על זמן תמלול בפועל. לוחצים <strong>Create</strong> וממתינים כדקה שהמנוע יעלה.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">4</div><div class="step-content"><strong data-i18n="ivritS4t">העתקת מפתח ה-API</strong><p data-i18n="ivritS4p">בתפריט הצדדי נכנסים ל-<strong>Settings → API Keys</strong>, לוחצים <strong>Create API Key</strong>, מעתיקים את המפתח ומדביקים בשדה <strong>API Key</strong> למעלה. שימו לב: המפתח מוצג פעם אחת בלבד.</p></div></div>
+            <div class="tutorial-step"><div class="step-number">5</div><div class="step-content"><strong data-i18n="ivritS5t">העתקת מזהה ה-Endpoint</strong><p data-i18n="ivritS5p">חוזרים ללשונית <strong>Serverless</strong>, פותחים את ה-Endpoint שיצרתם, ומעתיקים את ה-<strong>Endpoint ID</strong> (מזהה קצר שמופיע מתחת לשם) לשדה <strong>Endpoint ID</strong> למעלה.</p></div></div>
             <div class="tutorial-step"><div class="step-number">6</div><div class="step-content"><strong data-i18n="ivritS6t">שמירה</strong><p data-i18n="ivritS6p">לוחצים על <strong>שמור מפתחות API</strong> — וזהו, אפשר להתחיל לתמלל.</p></div></div>
-            <div class="tut-note" data-i18n="ivritCost">💡 השירות פועל בתשלום לפי שימוש, אך העלות לשעת תמלול נמוכה מאוד — כך שטעינת קרדיט קטנה מספיקה בדרך כלל לשעות רבות של שיעורים והקלטות.</div>
+            <div class="tut-note" data-i18n="ivritCost">💡 השירות בתשלום לפי שימוש והעלות לשעת תמלול נמוכה מאוד — טעינת קרדיט קטנה מספיקה בדרך כלל לשעות רבות. שימו לב: התמלול <strong>הראשון</strong> אחרי הפסקה עשוי לקחת דקה-שתיים נוספות (המנוע ״מתעורר״), ולאחר מכן זה מהיר.</div>
           </div>
         </div>
 
@@ -370,15 +370,15 @@ const T = {
     clearHistory: '🗑️ נקה את כל ההיסטוריה',
     statTranscriptions: 'תמלולים', statDownloads: 'הורדות מיוטיוב', statRecordings: 'הקלטות',
     setIvritTitle: '🗝️ הגדרת התמלול (ivrit.ai)', ivritTutTitle: '📖 איך מפעילים את התמלול של ivrit.ai',
-    ivritIntro: 'מנוע התמלול ivrit.ai מתמלל עברית באיכות גבוהה. כדי להשתמש בו צריך נקודת קצה (Endpoint) פרטית שרצה בענן של RunPod, ולכן נדרשים שני פרטים מ-RunPod: מפתח API ומזהה Endpoint. ההגדרה היא חד-פעמית ולוקחת כמה דקות.',
+    ivritIntro: 'מנוע התמלול של ivrit.ai מתמלל עברית באיכות גבוהה. הוא רץ על שרת פרטי שלכם בענן של RunPod, וההגדרה היא חד-פעמית שלוקחת כמה דקות. בסוף התהליך תעתיקו שני ערכים מ-RunPod — <strong>API Key</strong> ו-<strong>Endpoint ID</strong> — לשדות שכאן למעלה.',
     ivritLinks: 'קישורים שימושיים: <a href="https://www.ivrit.ai" target="_blank" rel="noopener">האתר הרשמי של ivrit.ai</a> · <a href="https://www.youtube.com/watch?v=xr8RQRFERLs" target="_blank" rel="noopener">🎬 סרטון הסבר מצולם</a>',
     ivritS1t: 'פתיחת חשבון ב-RunPod', ivritS1p: 'היכנסו ל-<a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> והתחברו (אפשר עם חשבון Google).',
     ivritS2t: 'טעינת קרדיט קטן', ivritS2p: 'בעמוד <strong>Billing</strong> מוסיפים סכום קטן. השירות מחויב לפי שימוש, וגם סכום נמוך מספיק להרבה שעות תמלול.',
-    ivritS3t: 'פריסת המנוע של ivrit.ai', ivritS3p: 'בלשונית <strong>Serverless</strong> לוחצים על <strong>New Endpoint</strong> ובוחרים את התבנית של ivrit.ai (ה-image בשם <code>ivrit-ai/runpod-serverless</code>).',
-    ivritS4t: 'העתקת מפתח ה-API', ivritS4p: 'נכנסים ל-<strong>Settings → API Keys</strong>, יוצרים מפתח חדש ומדביקים אותו בשדה <strong>API Key</strong> למעלה.',
-    ivritS5t: 'העתקת מזהה ה-Endpoint', ivritS5p: 'פותחים את ה-Endpoint שיצרתם ומעתיקים את ה-<strong>Endpoint ID</strong> לשדה <strong>Endpoint ID</strong> למעלה.',
+    ivritS3t: 'פריסת המנוע (Deploy בלחיצה)', ivritS3p: 'בשורת החיפוש של RunPod חפשו <strong>ivrit</strong>, פתחו את התבנית הרשמית של ivrit.ai ולחצו <strong>Deploy</strong>. מומלץ לבחור את ה-GPU הזול ביותר ולהגדיר <strong>Active Workers = 0</strong> — כך תשלמו רק על זמן תמלול בפועל. לוחצים <strong>Create</strong> וממתינים כדקה שהמנוע יעלה.',
+    ivritS4t: 'העתקת מפתח ה-API', ivritS4p: 'בתפריט הצדדי נכנסים ל-<strong>Settings → API Keys</strong>, לוחצים <strong>Create API Key</strong>, מעתיקים את המפתח ומדביקים בשדה <strong>API Key</strong> למעלה. שימו לב: המפתח מוצג פעם אחת בלבד.',
+    ivritS5t: 'העתקת מזהה ה-Endpoint', ivritS5p: 'חוזרים ללשונית <strong>Serverless</strong>, פותחים את ה-Endpoint שיצרתם, ומעתיקים את ה-<strong>Endpoint ID</strong> (מזהה קצר שמופיע מתחת לשם) לשדה <strong>Endpoint ID</strong> למעלה.',
     ivritS6t: 'שמירה', ivritS6p: 'לוחצים על <strong>שמור מפתחות API</strong> — וזהו, אפשר להתחיל לתמלל.',
-    ivritCost: '💡 השירות פועל בתשלום לפי שימוש, אך העלות לשעת תמלול נמוכה מאוד — כך שטעינת קרדיט קטנה מספיקה בדרך כלל לשעות רבות של שיעורים והקלטות.',
+    ivritCost: '💡 השירות בתשלום לפי שימוש והעלות לשעת תמלול נמוכה מאוד — טעינת קרדיט קטנה מספיקה בדרך כלל לשעות רבות. שימו לב: התמלול <strong>הראשון</strong> אחרי הפסקה עשוי לקחת דקה-שתיים נוספות (המנוע ״מתעורר״), ולאחר מכן זה מהיר.',
     labelIvritKey: 'ivrit.ai — API Key (RunPod)', labelIvritEp: 'ivrit.ai — Endpoint ID',
     setRapidTitle: '🔑 הורדת יוטיוב (RapidAPI) — אופציונלי', rapidTutTitle: '📖 איך משיגים מפתח RapidAPI חינמי',
     rapidIntro: 'להורדת אודיו מיוטיוב אין צורך במפתח של גוגל. האתר משתמש בשירות חיצוני בשם RapidAPI, שיש בו חבילה חינמית שמספיקה לשימוש יומיומי. ההרשמה אורכת דקה או שתיים ואינה דורשת כרטיס אשראי.',
@@ -441,15 +441,15 @@ const T = {
     clearHistory: '🗑️ Clear all history',
     statTranscriptions: 'Transcriptions', statDownloads: 'YouTube downloads', statRecordings: 'Recordings',
     setIvritTitle: '🗝️ Transcription setup (ivrit.ai)', ivritTutTitle: '📖 How to set up ivrit.ai transcription',
-    ivritIntro: 'The ivrit.ai engine transcribes Hebrew at high quality. To use it you need a private Endpoint running on the RunPod cloud, so two details from RunPod are required: an API key and an Endpoint ID. This is a one-time setup that takes a few minutes.',
+    ivritIntro: 'The ivrit.ai engine transcribes Hebrew at high quality. It runs on your own private server in the RunPod cloud — a one-time setup that takes a few minutes. At the end you\'ll copy two values from RunPod — an <strong>API Key</strong> and an <strong>Endpoint ID</strong> — into the fields above.',
     ivritLinks: 'Useful links: <a href="https://www.ivrit.ai" target="_blank" rel="noopener">official ivrit.ai site</a> · <a href="https://www.youtube.com/watch?v=xr8RQRFERLs" target="_blank" rel="noopener">🎬 video walkthrough</a>',
     ivritS1t: 'Create a RunPod account', ivritS1p: 'Go to <a href="https://www.runpod.io/console/serverless" target="_blank" rel="noopener">RunPod Serverless</a> and sign in (Google works too).',
     ivritS2t: 'Add a small amount of credit', ivritS2p: 'On the <strong>Billing</strong> page add a small amount. The service is pay-as-you-go, and even a low amount covers many hours of transcription.',
-    ivritS3t: 'Deploy the ivrit.ai engine', ivritS3p: 'On the <strong>Serverless</strong> tab click <strong>New Endpoint</strong> and pick the ivrit.ai template (the <code>ivrit-ai/runpod-serverless</code> image).',
-    ivritS4t: 'Copy the API Key', ivritS4p: 'Go to <strong>Settings → API Keys</strong>, create a new key and paste it into the <strong>API Key</strong> field above.',
-    ivritS5t: 'Copy the Endpoint ID', ivritS5p: 'Open the endpoint you created and copy its <strong>Endpoint ID</strong> into the <strong>Endpoint ID</strong> field above.',
+    ivritS3t: 'Deploy the engine (one click)', ivritS3p: 'In RunPod\'s search box, search for <strong>ivrit</strong>, open the official ivrit.ai template and click <strong>Deploy</strong>. Pick the cheapest GPU and set <strong>Active Workers = 0</strong> — so you only pay for actual transcription time. Click <strong>Create</strong> and wait about a minute for the engine to come up.',
+    ivritS4t: 'Copy the API Key', ivritS4p: 'In the side menu go to <strong>Settings → API Keys</strong>, click <strong>Create API Key</strong>, copy it and paste it into the <strong>API Key</strong> field above. Note: the key is shown only once.',
+    ivritS5t: 'Copy the Endpoint ID', ivritS5p: 'Go back to the <strong>Serverless</strong> tab, open the endpoint you created, and copy its <strong>Endpoint ID</strong> (the short id shown under its name) into the <strong>Endpoint ID</strong> field above.',
     ivritS6t: 'Save', ivritS6p: 'Click <strong>Save API keys</strong> — that’s it, you can start transcribing.',
-    ivritCost: '💡 The service is pay-as-you-go, but the cost per transcribed hour is very low — so even a small amount of credit is usually enough for many lessons and recordings.',
+    ivritCost: '💡 The service is pay-as-you-go and the cost per transcribed hour is very low — a small top-up is usually enough for many hours. Note: the <strong>first</strong> transcription after a break may take an extra minute or two (the engine "wakes up"), then it\'s fast.',
     labelIvritKey: 'ivrit.ai — API Key (RunPod)', labelIvritEp: 'ivrit.ai — Endpoint ID',
     setRapidTitle: '🔑 YouTube download (RapidAPI) — optional', rapidTutTitle: '📖 How to get a free RapidAPI key',
     rapidIntro: 'Downloading audio from YouTube does not require a Google key. The site uses an external service called RapidAPI, which has a free plan that is enough for everyday use. Signing up takes a minute or two and needs no credit card.',
