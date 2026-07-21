@@ -669,7 +669,7 @@ async function startTranscription() {
     state.stats.transcriptions++;
     if (source === 'record') state.stats.recordings++;
     saveStats(); updateStats();
-    if (state.settings.saveHistory) addHistory({ id: Date.now().toString(), source, timestamp: Date.now(), text });
+    if (state.settings.saveHistory) addHistory({ id: Date.now().toString(), source, timestamp: Date.now(), text, title: source === 'upload' ? (state.fileName || '') : '' });
     if (state.settings.notifications) showToast(t('transcribeDone'), 'success');
   } catch (err) {
     hideLoading('t'); showError('t', err.message);
@@ -854,7 +854,7 @@ async function doYoutubeTranscription(cfg) {
   document.getElementById('y-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   state.stats.transcriptions++; saveStats(); updateStats();
-  if (state.settings.saveHistory) addHistory({ id: Date.now().toString(), source: 'link', timestamp: Date.now(), text });
+  if (state.settings.saveHistory) addHistory({ id: Date.now().toString(), source: 'link', timestamp: Date.now(), text, title: (state.ytData.title || '') });
   if (state.settings.notifications) showToast(t('transcribeDone'), 'success');
 }
 
@@ -931,7 +931,7 @@ function renderHistory() {
   const list = document.getElementById('history-list');
   const clearBtn = document.getElementById('clear-history-btn');
   const q = (document.getElementById('history-search').value || '').trim().toLowerCase();
-  const items = q ? state.history.filter(r => (r.text || '').toLowerCase().includes(q)) : state.history;
+  const items = q ? state.history.filter(r => ((r.text || '') + ' ' + (r.title || '')).toLowerCase().includes(q)) : state.history;
 
   if (!state.history.length) {
     list.innerHTML = '<div class="empty-history"><div class="empty-history-icon">📭</div><p><strong>' + t('emptyTitle') + '</strong></p><p>' + t('emptySub') + '</p></div>';
@@ -950,8 +950,11 @@ function renderHistory() {
     item.onclick = () => openModal(rec);
     item.innerHTML =
       '<div class="history-badge ' + m.c + '">' + m.i + ' ' + t(m.k) + '</div>' +
-      '<div class="history-details"><div class="history-preview"></div><div class="history-date">' + date + '</div></div>' +
+      '<div class="history-details">' +
+        (rec.title ? '<div class="history-title"></div>' : '') +
+        '<div class="history-preview"></div><div class="history-date">' + date + '</div></div>' +
       '<div class="history-del" title="✕">🗑️</div>';
+    if (rec.title) item.querySelector('.history-title').textContent = rec.title;
     item.querySelector('.history-preview').textContent = rec.text;
     item.querySelector('.history-del').onclick = e => deleteHistory(rec.id, e);
     list.appendChild(item);
@@ -971,7 +974,7 @@ function updateStats() {
 function openModal(rec) {
   state.modalText = rec.text;
   const m = srcMeta(rec.source);
-  document.getElementById('modal-title').textContent = m.i + ' ' + t(m.k) + ' — ' + new Date(rec.timestamp).toLocaleString(state.settings.lang === 'he' ? 'he-IL' : 'en-US');
+  document.getElementById('modal-title').textContent = m.i + ' ' + (rec.title || t(m.k)) + ' — ' + new Date(rec.timestamp).toLocaleString(state.settings.lang === 'he' ? 'he-IL' : 'en-US');
   document.getElementById('modal-body').textContent = rec.text;
   document.getElementById('modal').classList.add('open');
 }
